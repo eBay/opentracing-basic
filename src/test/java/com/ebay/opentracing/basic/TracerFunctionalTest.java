@@ -158,16 +158,17 @@ public class TracerFunctionalTest {
         assertTrue(logEventStrings.remove("with1@54321=val1"));
         assertTrue(logEventStrings.remove("with2@54321=val2"));
         for (String logEventString : logEventStrings) {
-            if (logEventString.startsWith("eventName@"))
+            if (logEventString.startsWith("eventName@")) {
                 assertTrue(logEventString.endsWith("=eventValue"));
-            else if (logEventString.startsWith("without1@"))
+            } else if (logEventString.startsWith("without1@")) {
                 assertTrue(logEventString.endsWith("=val1"));
-            else if (logEventString.startsWith("without2@"))
+            } else if (logEventString.startsWith("without2@")) {
                 assertTrue(logEventString.endsWith("=val2"));
-            else if (logEventString.startsWith("event@"))
+            } else if (logEventString.startsWith("event@")) {
                 assertTrue(logEventString.endsWith("=no timestamp"));
-            else
+            } else {
                 fail("Unknown string: " + logEventString);
+            }
         }
     }
 
@@ -424,16 +425,18 @@ public class TracerFunctionalTest {
     @Nullable
     private String locateValue(Iterable<Map.Entry<String, String>> entries, String key) {
         for (Map.Entry<String, String> entry : entries) {
-            if (key.equals(entry.getKey()))
+            if (key.equals(entry.getKey())) {
                 return entry.getValue();
+            }
         }
         return null;
     }
 
     private int iterableSize(Iterable<?> entries) {
         int count = 0;
-        for (Object entry : entries)
+        for (Object entry : entries) {
             count++;
+        }
         return count;
     }
 

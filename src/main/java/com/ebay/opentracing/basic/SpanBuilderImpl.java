@@ -71,8 +71,9 @@ final class SpanBuilderImpl<T> implements Tracer.SpanBuilder {
      */
     @Override
     public Tracer.SpanBuilder addReference(String referenceType, SpanContext referencedContext) {
-        if (!(referencedContext instanceof InternalSpanContext))
+        if (!(referencedContext instanceof InternalSpanContext)) {
             throw new IllegalStateException("Foreign span context provided");
+        }
 
         @SuppressWarnings("unchecked")
         InternalSpanContext<T> spanContextImpl = (InternalSpanContext<T>) referencedContext;
@@ -81,8 +82,9 @@ final class SpanBuilderImpl<T> implements Tracer.SpanBuilder {
     }
 
     private Tracer.SpanBuilder addReference(String referenceType, InternalSpanContext<T> spanContext) {
-        if (references == null)
+        if (references == null) {
             references = new HashMap<>();
+        }
         List<InternalSpanContext<T>> list = references.get(referenceType);
         if (list == null) {
             list = new ArrayList<>(4);
@@ -106,8 +108,9 @@ final class SpanBuilderImpl<T> implements Tracer.SpanBuilder {
      */
     @Override
     public Tracer.SpanBuilder withTag(String key, String value) {
-        if (tags == null)
+        if (tags == null) {
             tags = new HashMap<>(5);
+        }
         tags.put(key, value);
         return this;
     }
@@ -154,10 +157,11 @@ final class SpanBuilderImpl<T> implements Tracer.SpanBuilder {
     public Span startManual() {
         SpanState<T> spanState = buildContext();
         ActiveSpan activeSpan = activeSpanSource.activeSpan();
-        if (activeSpan != null || sampleController.isSampled(spanState))
+        if (activeSpan != null || sampleController.isSampled(spanState)) {
             return new SpanImpl<>(spanState, spanFinisher);
-        else
+        } else {
             return new UnsampledRootSpan<>(spanState.getSpanContext());
+        }
     }
 
     /**
@@ -175,17 +179,20 @@ final class SpanBuilderImpl<T> implements Tracer.SpanBuilder {
         InternalSpanContext<T> activeContext = (InternalSpanContext<T>) (activeSpan == null ? null : activeSpan.context());
 
         // Implicit child-of active span relationship
-        if (references == null && activeContext != null && !ignoreActiveSpan)
+        if (references == null && activeContext != null && !ignoreActiveSpan) {
             references = Collections.singletonMap(References.CHILD_OF, Collections.singletonList(activeContext));
+        }
 
-        if (references == null)
+        if (references == null) {
             references = Collections.emptyMap();
+        }
 
         InternalSpanContext<T> internalSpanContext;
-        if (ignoreActiveSpan || activeContext == null)
+        if (ignoreActiveSpan || activeContext == null) {
             internalSpanContext = traceContextHandler.createNew();
-        else
+        } else {
             internalSpanContext = traceContextHandler.createForContext(references);
+        }
 
         // Use current time as start time if not specified
         if (startTimeUnit == null) {

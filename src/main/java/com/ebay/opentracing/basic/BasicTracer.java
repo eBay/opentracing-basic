@@ -50,8 +50,9 @@ final class BasicTracer<T> implements Tracer {
      */
     @Override
     public <C> void inject(SpanContext spanContext, Format<C> format, C carrier) {
-        if (!(spanContext instanceof InternalSpanContext))
+        if (!(spanContext instanceof InternalSpanContext)) {
             throw new IllegalStateException("Foreign span context provided");
+        }
         TracerPreconditions.checkNotNull(format, "format may not be null");
         TracerPreconditions.checkNotNull(carrier, "carrier may not be null");
 

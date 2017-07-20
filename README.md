@@ -94,9 +94,7 @@ try (ActiveSpan span = tracer.buildSpan("operation").startActive()) {
 }
 ```
 
- To achieve cross-process operation, the developer will also need to
- create an implementation of the
- [Formatter](https://github.corp.ebay.com/mcumings/opentracing-basic/blob/master/src/main/java/com/ebay/opentracing/basic/Formatter.java)
+ To achieve cross-process operation, tcom/mcumings/opentracing-basic/blob/master/src/main/java/com/ebay/opentracing/basic/Formatter.java)
  interface in order to define how the trace/span context is applied to
  a data carrier of a particular type.  Once defined, the formatter
  should be registered at Tracer- creation time as in the following

@@ -90,7 +90,8 @@ final class SpanState<T> implements SpanData<T> {
      * @param operationName new operation name
      */
     void setOperationName(String operationName) {
-        this.operationName = TracerPreconditions.checkNotNull(operationName, "operationName may not be null");
+        this.operationName = TracerPreconditions.checkNotNull(
+                operationName, "operationName may not be null");
     }
 
     /**
@@ -132,8 +133,9 @@ final class SpanState<T> implements SpanData<T> {
         if (childOfList != null && !childOfList.isEmpty()) {
             builder.append(",childOf=[");
             for (int i = 0; i < childOfList.size(); i++) {
-                if (i > 0)
+                if (i > 0) {
                     builder.append(",");
+                }
                 builder.append(childOfList.get(i));
             }
             builder.append("]");
@@ -142,8 +144,9 @@ final class SpanState<T> implements SpanData<T> {
         if (followsFromList != null && !followsFromList.isEmpty()) {
             builder.append(",followsFrom=[");
             for (int i = 0; i < followsFromList.size(); i++) {
-                if (i > 0)
+                if (i > 0) {
                     builder.append(",");
+                }
                 builder.append(followsFromList.get(i));
             }
             builder.append("]");
@@ -163,8 +166,9 @@ final class SpanState<T> implements SpanData<T> {
                 Iterator<String> tagIterator = tagKeys.iterator();
                 while (tagIterator.hasNext()) {
                     builder.append(tagIterator.next());
-                    if (tagIterator.hasNext())
+                    if (tagIterator.hasNext()) {
                         builder.append(",");
+                    }
                 }
                 builder.append("]");
             }
@@ -185,15 +189,17 @@ final class SpanState<T> implements SpanData<T> {
     }
 
     void putTag(String key, String value) {
-        if (tags == null)
+        if (tags == null) {
             tags = Collections.synchronizedMap(new HashMap<String, String>());
+        }
         tags.put(key, value);
 
     }
 
     void addLogEvent(LogEvent logEvent) {
-        if (logs == null)
+        if (logs == null) {
             logs = Collections.synchronizedList(new ArrayList<LogEvent>(5));
+        }
         logs.add(logEvent);
     }
 

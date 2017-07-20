@@ -37,9 +37,11 @@ final class Formatters<T> {
         TracerPreconditions.checkNotNull(format);
 
         @SuppressWarnings("unchecked") // Protected via strong typing at registration point
-                Formatter<T, C> formatter = (Formatter<T, C>) formatters.get(format);
-        if (formatter == null)
+        Formatter<T, C> formatter = (Formatter<T, C>) formatters.get(format);
+
+        if (formatter == null) {
             throw new UnsupportedOperationException("Format not supported: " + format);
+        }
         return formatter;
     }
 

@@ -26,10 +26,12 @@ public final class BaggageBuilder {
     public BaggageBuilder inheritAll(List<Baggage> baggages) {
         TracerPreconditions.checkNotNull(baggages, "baggages instance may not be null");
 
-        if (inherited == null)
+        if (inherited == null) {
             inherited = new ArrayList<>(baggages.size() + 4);
-        for (Baggage baggage : baggages)
+        }
+        for (Baggage baggage : baggages) {
             inherited.add(baggage.getAsMap());
+        }
         return this;
     }
 
@@ -42,8 +44,9 @@ public final class BaggageBuilder {
     public BaggageBuilder inherit(Baggage baggage) {
         TracerPreconditions.checkNotNull(baggage, "baggage instance may not be null");
 
-        if (inherited == null)
+        if (inherited == null) {
             inherited = new ArrayList<>(4);
+        }
 
         Map<String, String> map = baggage.getAsMap();
         inherited.add(map);
@@ -64,8 +67,9 @@ public final class BaggageBuilder {
         // TODO - This one is questionable as it could be used to remove existing baggage
         TracerPreconditions.checkNotNull(value, "value may not be null");
 
-        if (local == null)
+        if (local == null) {
             local = new HashMap<>(4);
+        }
         local.put(key, value);
         totalEntries++;
 
@@ -80,11 +84,13 @@ public final class BaggageBuilder {
     public Baggage build() {
         HashMap<String, String> map = new HashMap<>(totalEntries);
         if (inherited != null) {
-            for (Map<String, String> inherit : inherited)
+            for (Map<String, String> inherit : inherited) {
                 map.putAll(inherit);
+            }
         }
-        if (local != null)
+        if (local != null) {
             map.putAll(local);
+        }
         return new Baggage(Collections.unmodifiableMap(map));
     }
 }

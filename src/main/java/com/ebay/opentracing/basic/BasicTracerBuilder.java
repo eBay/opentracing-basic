@@ -36,8 +36,8 @@ public final class BasicTracerBuilder<T> {
      * @param receiver            receiver instance
      */
     public BasicTracerBuilder(TraceContextHandler<T> traceContextHandler, FinishedSpanReceiver<T> receiver) {
-        this.traceContextHandler =
-                TracerPreconditions.checkNotNull(traceContextHandler, "traceContextHandler may not be null");
+        this.traceContextHandler = TracerPreconditions.checkNotNull(
+                traceContextHandler, "traceContextHandler may not be null");
         this.receiver = TracerPreconditions.checkNotNull(receiver, "receiver may not be null");
     }
 
@@ -49,7 +49,8 @@ public final class BasicTracerBuilder<T> {
      * @return builder instance
      */
     public BasicTracerBuilder<T> activeSpanSource(ActiveSpanSource activeSpanSource) {
-        this.activeSpanSource = TracerPreconditions.checkNotNull(activeSpanSource, "activeSpanSource may not be null");
+        this.activeSpanSource = TracerPreconditions.checkNotNull(
+                activeSpanSource, "activeSpanSource may not be null");
         return this;
     }
 
@@ -60,7 +61,8 @@ public final class BasicTracerBuilder<T> {
      * @return builder instance
      */
     public BasicTracerBuilder<T> sampleController(SampleController<T> sampleController) {
-        this.sampleController = TracerPreconditions.checkNotNull(sampleController, "sampleController may not be null");
+        this.sampleController = TracerPreconditions.checkNotNull(
+                sampleController, "sampleController may not be null");
         return this;
     }
 
@@ -88,11 +90,13 @@ public final class BasicTracerBuilder<T> {
      * @return tracer instance
      */
     public Tracer build() {
-        if (activeSpanSource == null)
+        if (activeSpanSource == null) {
             activeSpanSource = new ThreadLocalActiveSpanSource();
+        }
 
-        if (sampleController == null)
+        if (sampleController == null) {
             sampleController = new SampleControllerAlways<>();
+        }
 
         return new BasicTracer<>(traceContextHandler, receiver, activeSpanSource, sampleController, formatters);
     }

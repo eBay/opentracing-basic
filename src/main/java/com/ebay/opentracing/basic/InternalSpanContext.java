@@ -23,7 +23,6 @@ public final class InternalSpanContext<T> implements SpanContext {
     public InternalSpanContext(T traceContext, Baggage baggage) {
         this.traceContext = traceContext;
         this.baggageRef = new AtomicReference<>(baggage);
-
     }
 
     public T getTraceContext() {
@@ -43,7 +42,6 @@ public final class InternalSpanContext<T> implements SpanContext {
     public String toString() {
         return "SpanContext{" + traceContext + "}";
     }
-
 
     void setBaggageItem(String key, String value) {
         boolean success;
