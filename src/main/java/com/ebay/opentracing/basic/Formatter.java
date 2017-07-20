@@ -12,24 +12,24 @@ import io.opentracing.propagation.Format;
  * @param <T> trace context type
  * @param <C> carrier data object type
  */
-public interface Formatter<T, C>
-{
-	/**
-	 * Performs the work of {@link io.opentracing.Tracer#inject(SpanContext, Format, Object)} to apply
-	 * span context to a carrier data instance.
-	 *
-	 * @param spanContext span context
-	 * @param carrier carrier data container
-	 */
-	void inject(InternalSpanContext<T> spanContext, C carrier);
+public interface Formatter<T, C> {
 
-	/**
-	 * Performs the work of {@link io.opentracing.Tracer#extract(Format, Object)} to extract span context data
-	 * from a carrier data instance.
-	 *
-	 * @param carrier carrier data container
-	 * @return reconstituted span context
-	 */
-	InternalSpanContext<T> extract(C carrier);
+    /**
+     * Performs the work of {@link io.opentracing.Tracer#inject(SpanContext, Format, Object)} to apply
+     * span context to a carrier data instance.
+     *
+     * @param spanContext span context
+     * @param carrier     carrier data container
+     */
+    void inject(InternalSpanContext<T> spanContext, C carrier);
+
+    /**
+     * Performs the work of {@link io.opentracing.Tracer#extract(Format, Object)} to extract span context data
+     * from a carrier data instance.
+     *
+     * @param carrier carrier data container
+     * @return reconstituted span context
+     */
+    InternalSpanContext<T> extract(C carrier);
 
 }

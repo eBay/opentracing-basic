@@ -1,32 +1,27 @@
 package com.ebay.opentracing.basic;
 
-class TestTraceContext
-{
+class TestTraceContext {
 
-	private final String traceId;
+    private final String traceId;
 
-	private final String spanId;
+    private final String spanId;
 
-	TestTraceContext(String traceId, String spanId)
-	{
-		this.traceId = traceId;
-		this.spanId = spanId;
-	}
+    TestTraceContext(String traceId, String spanId) {
+        this.traceId = traceId;
+        this.spanId = spanId;
+    }
 
-	String getTraceId()
-	{
-		return traceId;
-	}
+    String getTraceId() {
+        return traceId;
+    }
 
-	public String getSpanId()
-	{
-		return spanId;
-	}
+    String getSpanId() {
+        return spanId;
+    }
 
-	@Override
-	public String toString()
-	{
-		return getSpanId();
-	}
+    @Override
+    public String toString() {
+        return getSpanId();
+    }
 
 }

@@ -5,16 +5,14 @@ package com.ebay.opentracing.basic;
  *
  * @param <T> trace context type
  */
-final class SampleControllerAlways<T> implements SampleController<T>
-{
+final class SampleControllerAlways<T> implements SampleController<T> {
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public boolean isSampled(SpanData<T> spanData)
-	{
-		return true;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isSampled(SpanData<T> spanData) {
+        return true;
+    }
 
 }

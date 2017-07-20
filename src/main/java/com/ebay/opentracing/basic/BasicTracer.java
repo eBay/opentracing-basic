@@ -15,86 +15,79 @@ import io.opentracing.propagation.Format;
  *
  * @param <T> trace context type
  */
-final class BasicTracer<T> implements Tracer
-{
+final class BasicTracer<T> implements Tracer {
 
-	private final TraceContextHandler<T> traceContextHandler;
-	private final SpanFinisher<T> spanFinisher;
-	private final Formatters<T> formatters;
-	private final SampleController<T> sampleController;
-	private final ActiveSpanSource activeSpanSource;
+    private final TraceContextHandler<T> traceContextHandler;
+    private final SpanFinisher<T> spanFinisher;
+    private final Formatters<T> formatters;
+    private final SampleController<T> sampleController;
+    private final ActiveSpanSource activeSpanSource;
 
-	BasicTracer(
-		TraceContextHandler<T> traceContextHandler,
-		FinishedSpanReceiver<T> finishedSpanReceiver,
-		ActiveSpanSource activeSpanSource,
-		SampleController<T> sampleController,
-		Formatters<T> formatters)
-	{
-		this.traceContextHandler = traceContextHandler;
-		this.spanFinisher = new SpanFinisher<>(finishedSpanReceiver);
-		this.activeSpanSource = activeSpanSource;
-		this.sampleController = sampleController;
-		this.formatters = formatters;
-	}
+    BasicTracer(
+            TraceContextHandler<T> traceContextHandler,
+            FinishedSpanReceiver<T> finishedSpanReceiver,
+            ActiveSpanSource activeSpanSource,
+            SampleController<T> sampleController,
+            Formatters<T> formatters) {
+        this.traceContextHandler = traceContextHandler;
+        this.spanFinisher = new SpanFinisher<>(finishedSpanReceiver);
+        this.activeSpanSource = activeSpanSource;
+        this.sampleController = sampleController;
+        this.formatters = formatters;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public SpanBuilder buildSpan(String operationName)
-	{
-		TracerPreconditions.checkNotNull(operationName, "operationName may not be null");
-		return new SpanBuilderImpl<>(activeSpanSource, spanFinisher, traceContextHandler, sampleController, operationName);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SpanBuilder buildSpan(String operationName) {
+        TracerPreconditions.checkNotNull(operationName, "operationName may not be null");
+        return new SpanBuilderImpl<>(activeSpanSource, spanFinisher, traceContextHandler, sampleController, operationName);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public <C> void inject(SpanContext spanContext, Format<C> format, C carrier)
-	{
-		if (!(spanContext instanceof InternalSpanContext))
-			throw new IllegalStateException("Foreign span context provided");
-		TracerPreconditions.checkNotNull(format, "format may not be null");
-		TracerPreconditions.checkNotNull(carrier, "carrier may not be null");
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <C> void inject(SpanContext spanContext, Format<C> format, C carrier) {
+        if (!(spanContext instanceof InternalSpanContext))
+            throw new IllegalStateException("Foreign span context provided");
+        TracerPreconditions.checkNotNull(format, "format may not be null");
+        TracerPreconditions.checkNotNull(carrier, "carrier may not be null");
 
-		@SuppressWarnings("unchecked")
-		InternalSpanContext<T> internalSpanContext = (InternalSpanContext<T>) spanContext;
+        @SuppressWarnings("unchecked")
+        InternalSpanContext<T> internalSpanContext = (InternalSpanContext<T>) spanContext;
 
-		Formatter<T, C> formatter = formatters.get(format);
-		formatter.inject(internalSpanContext, carrier);
-	}
+        Formatter<T, C> formatter = formatters.get(format);
+        formatter.inject(internalSpanContext, carrier);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public <C> SpanContext extract(Format<C> format, C carrier)
-	{
-		TracerPreconditions.checkNotNull(format, "format may not be null");
-		TracerPreconditions.checkNotNull(carrier, "carrier may not be null");
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <C> SpanContext extract(Format<C> format, C carrier) {
+        TracerPreconditions.checkNotNull(format, "format may not be null");
+        TracerPreconditions.checkNotNull(carrier, "carrier may not be null");
 
-		Formatter<T, C> formatter = formatters.get(format);
-		return formatter.extract(carrier);
-	}
+        Formatter<T, C> formatter = formatters.get(format);
+        return formatter.extract(carrier);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public ActiveSpan activeSpan()
-	{
-		return activeSpanSource.activeSpan();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ActiveSpan activeSpan() {
+        return activeSpanSource.activeSpan();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public ActiveSpan makeActive(Span span)
-	{
-		return activeSpanSource.makeActive(span);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ActiveSpan makeActive(Span span) {
+        return activeSpanSource.makeActive(span);
+    }
 
 }

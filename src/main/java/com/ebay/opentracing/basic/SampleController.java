@@ -8,15 +8,14 @@ package com.ebay.opentracing.basic;
  * @param <T> trace context
  */
 @SuppressWarnings("WeakerAccess") // API class
-public interface SampleController<T>
-{
+public interface SampleController<T> {
 
-	/**
-	 * Determines whether or not the span with the provided information should be sampled.
-	 *
-	 * @param spanData information about the span which is being considered
-	 * @return {@code true} if a trace should be created, {@code false} otherwise
-	 */
-	boolean isSampled(SpanData<T> spanData);
+    /**
+     * Determines whether or not the span with the provided information should be sampled.
+     *
+     * @param spanData information about the span which is being considered
+     * @return {@code true} if a trace should be created, {@code false} otherwise
+     */
+    boolean isSampled(SpanData<T> spanData);
 
 }
