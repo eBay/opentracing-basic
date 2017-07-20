@@ -3,16 +3,17 @@
 ## Introduction
 
  The [OpenTracing API for Java](https://github.com/opentracing/opentracing-java)
- is defines the interfaces for how a user interacts with a compliant
+ defines the interfaces for how a user interacts with a compliant
  OpenTracing back-end but leaves it up to the OpenTracing backend
  implementation to fulfill the API requirements. When creating simple
  bridge implementations, tracing data ETL operations, or integrating
  OpenTracing support in constrained environments this can amount to
- re-inventing the wheel.
+ a significant effort in order to define and consistently adhere
+ to the API.
 
  The goal of this library is to attempt to implement the generic
- semantics of the OpenTracing API, allowing for the main implementation
- points to be provided into the library by the consumer.
+ semantics of the OpenTracing API and allow for the main implementation
+ details to be provided into the library by the consumer.
 
 ## Status
 
