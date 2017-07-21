@@ -194,7 +194,7 @@ final class SpanBuilderImpl<T> implements Tracer.SpanBuilder {
         }
 
         InternalSpanContext<T> internalSpanContext;
-        if (ignoreActiveSpan || activeContext == null) {
+        if (references.isEmpty()) {
             internalSpanContext = traceContextHandler.createNew();
         } else {
             internalSpanContext = traceContextHandler.createForContext(references);

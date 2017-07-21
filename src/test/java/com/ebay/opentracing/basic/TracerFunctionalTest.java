@@ -466,6 +466,55 @@ public class TracerFunctionalTest {
         assertEquals("37", locateValue(tags.entrySet(), "tag3"));
     }
 
+    @Test
+    public void spanBuilderWithReferenceShouldCallHandlerWithReferencesWhenNoActiveSpan() {
+        final TestTraceContextHandler traceContextHandler = new TestTraceContextHandler();
+        new Expectations(traceContextHandler)
+        {{
+            traceContextHandler.createNew();
+            times = 1;
+
+            traceContextHandler.createForContext((Map<String, List<InternalSpanContext<TestTraceContext>>>) any);
+            times = 1;
+        }};
+        uut = new BasicTracerBuilder<>(traceContextHandler, finishedSpanReceiver)
+                .sampleController(sampleController)
+                .build();
+
+        Span parent = uut.buildSpan("parent").startManual();
+        Span child = uut.buildSpan("child").asChildOf(parent.context()).startManual();
+
+        child.finish();
+        parent.finish();
+    }
+
+    @Test
+    public void spanBuilderWithReferenceWhenIgnoreActiveSpanShouldCallHandlerWithReferences() {
+        final TestTraceContextHandler traceContextHandler = new TestTraceContextHandler();
+        new Expectations(traceContextHandler)
+        {{
+            traceContextHandler.createNew();
+            times = 1;
+
+            traceContextHandler.createForContext((Map<String, List<InternalSpanContext<TestTraceContext>>>) any);
+            times = 1;
+        }};
+        uut = new BasicTracerBuilder<>(traceContextHandler, finishedSpanReceiver)
+                .sampleController(sampleController)
+                .build();
+
+        try (ActiveSpan parent = uut.buildSpan("parent").startActive())
+        {
+            try (ActiveSpan child = uut.buildSpan("child")
+                    .ignoreActiveSpan()
+                    .asChildOf(parent.context())
+                    .startActive())
+            {
+                // Empty
+            }
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private void whenAlwaysSampling() {
         new Expectations() {{
