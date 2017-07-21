@@ -1,8 +1,10 @@
 package com.ebay.opentracing.basic;
 
 import io.opentracing.ActiveSpan;
+import io.opentracing.BaseSpan;
 import io.opentracing.References;
 import io.opentracing.Span;
+import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
 import mockit.Delegate;
 import mockit.Expectations;
@@ -116,6 +118,57 @@ public class TracerFunctionalTest {
         SpanData<TestTraceContext> spanData = capturedSpanData.get(1);
         String string = spanData.toString();
         assertNotNull(string);
+    }
+
+    @Test
+    public void spanBuilderAsChildOfNullSpanContextShouldNoop() {
+        whenAlwaysSampling();
+        final ArrayList<SpanData<TestTraceContext>> capturedSpanData = new ArrayList<>();
+        new Expectations() {{
+            finishedSpanReceiver.spanFinished(withCapture(capturedSpanData));
+        }};
+        try (ActiveSpan span = uut.buildSpan("outer")
+                .asChildOf((SpanContext) null)
+                .startActive()) {
+        }
+        assertEquals(1, capturedSpanData.size());
+        SpanData<TestTraceContext> spanData = capturedSpanData.get(0);
+        List<? extends InternalSpanContext<TestTraceContext>> references = spanData.getReferences(References.CHILD_OF);
+        assertNull(references);
+    }
+
+    @Test
+    public void spanBuilderAsChildOfNullSpanShouldNoop() {
+        whenAlwaysSampling();
+        final ArrayList<SpanData<TestTraceContext>> capturedSpanData = new ArrayList<>();
+        new Expectations() {{
+            finishedSpanReceiver.spanFinished(withCapture(capturedSpanData));
+        }};
+        try (ActiveSpan span = uut.buildSpan("outer")
+                .asChildOf((BaseSpan<?>) null)
+                .startActive()) {
+        }
+        assertEquals(1, capturedSpanData.size());
+        SpanData<TestTraceContext> spanData = capturedSpanData.get(0);
+        List<? extends InternalSpanContext<TestTraceContext>> references = spanData.getReferences(References.CHILD_OF);
+        assertNull(references);
+    }
+
+    @Test
+    public void spanBuilderAddNullReferenceShouldNoop() {
+        whenAlwaysSampling();
+        final ArrayList<SpanData<TestTraceContext>> capturedSpanData = new ArrayList<>();
+        new Expectations() {{
+            finishedSpanReceiver.spanFinished(withCapture(capturedSpanData));
+        }};
+        try (ActiveSpan span = uut.buildSpan("outer")
+                .addReference(References.CHILD_OF, null)
+                .startActive()) {
+        }
+        assertEquals(1, capturedSpanData.size());
+        SpanData<TestTraceContext> spanData = capturedSpanData.get(0);
+        List<? extends InternalSpanContext<TestTraceContext>> references = spanData.getReferences(References.CHILD_OF);
+        assertNull(references);
     }
 
     @SuppressWarnings("deprecation") // Testing deprecated method in official API

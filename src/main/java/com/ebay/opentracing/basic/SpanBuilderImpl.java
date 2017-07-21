@@ -63,6 +63,9 @@ final class SpanBuilderImpl<T> implements Tracer.SpanBuilder {
      */
     @Override
     public Tracer.SpanBuilder asChildOf(BaseSpan<?> parent) {
+        if (parent == null)
+            return this;
+
         return addReference(References.CHILD_OF, parent.context());
     }
 
@@ -71,6 +74,9 @@ final class SpanBuilderImpl<T> implements Tracer.SpanBuilder {
      */
     @Override
     public Tracer.SpanBuilder addReference(String referenceType, SpanContext referencedContext) {
+        if (referencedContext == null)
+            return this;
+
         if (!(referencedContext instanceof InternalSpanContext)) {
             throw new IllegalStateException("Foreign span context provided");
         }
