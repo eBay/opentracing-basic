@@ -16,9 +16,9 @@ import java.util.concurrent.TimeUnit;
 abstract class BaseSpanImpl<S extends BaseSpan<S>, T> implements BaseSpan<S> {
     private static final String DEFAULT_EVENT_NAME = "event";
 
-    private final SpanState<T> spanState;
+    private final MutableSpanData<T> spanState;
 
-    BaseSpanImpl(SpanState<T> spanState) {
+    BaseSpanImpl(MutableSpanData<T> spanState) {
         this.spanState = TracerPreconditions.checkNotNull(spanState);
     }
 

@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @param <T> trace context type
  */
-final class SpanState<T> implements SpanData<T> {
+final class SpanState<T> implements MutableSpanData<T> {
 
     private final InternalSpanContext<T> spanContext;
     private final TimeUnit startTimeUnit;
@@ -85,11 +85,10 @@ final class SpanState<T> implements SpanData<T> {
     }
 
     /**
-     * Update the operation name to the provided value.
-     *
-     * @param operationName new operation name
+     * {@inheritDoc}
      */
-    void setOperationName(String operationName) {
+    @Override
+    public void setOperationName(String operationName) {
         this.operationName = TracerPreconditions.checkNotNull(
                 operationName, "operationName may not be null");
     }
@@ -178,17 +177,19 @@ final class SpanState<T> implements SpanData<T> {
     }
 
     /**
-     * Set the span finish time.
-     *
-     * @param finishTimeUnit  time unit
-     * @param finishTimeStamp time value
+     * {@inheritDoc}
      */
-    void setFinishTime(TimeUnit finishTimeUnit, long finishTimeStamp) {
+    @Override
+    public void setFinishTime(TimeUnit finishTimeUnit, long finishTimeStamp) {
         this.finishTimeUnit = TracerPreconditions.checkNotNull(finishTimeUnit, "finishTimeUnit may not be null");
         this.finishTimeStamp = finishTimeStamp;
     }
 
-    void putTag(String key, String value) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void putTag(String key, String value) {
         if (tags == null) {
             tags = Collections.synchronizedMap(new HashMap<String, String>());
         }
@@ -196,7 +197,11 @@ final class SpanState<T> implements SpanData<T> {
 
     }
 
-    void addLogEvent(LogEvent logEvent) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addLogEvent(LogEvent logEvent) {
         if (logs == null) {
             logs = Collections.synchronizedList(new ArrayList<LogEvent>(5));
         }

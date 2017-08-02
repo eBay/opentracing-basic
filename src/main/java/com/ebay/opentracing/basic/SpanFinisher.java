@@ -9,11 +9,11 @@ final class SpanFinisher<T> {
         this.receiver = receiver;
     }
 
-    void finish(SpanState<T> spanState) {
+    void finish(MutableSpanData<T> spanState) {
         finish(spanState, TimeUnit.MILLISECONDS, System.currentTimeMillis());
     }
 
-    void finish(SpanState<T> spanState, TimeUnit finishTimeUnit, long finishTime) {
+    void finish(MutableSpanData<T> spanState, TimeUnit finishTimeUnit, long finishTime) {
         spanState.setFinishTime(finishTimeUnit, finishTime);
         receiver.spanFinished(spanState);
     }

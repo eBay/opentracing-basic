@@ -5,10 +5,10 @@ import io.opentracing.Span;
 import java.util.concurrent.TimeUnit;
 
 final class SpanImpl<T> extends BaseSpanImpl<Span, T> implements Span {
-    private final SpanState<T> spanState;
+    private final MutableSpanData<T> spanState;
     private final SpanFinisher<T> spanFinisher;
 
-    SpanImpl(SpanState<T> spanState, SpanFinisher<T> spanFinisher) {
+    SpanImpl(MutableSpanData<T> spanState, SpanFinisher<T> spanFinisher) {
         super(spanState);
         this.spanState = spanState;
         this.spanFinisher = spanFinisher;
