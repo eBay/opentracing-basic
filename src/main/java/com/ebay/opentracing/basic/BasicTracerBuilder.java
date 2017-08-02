@@ -23,6 +23,9 @@ public final class BasicTracerBuilder<T> {
     private ActiveSpanSource activeSpanSource;
 
     @Nullable
+    private SpanInitiator<T> spanInitiator;
+
+    @Nullable
     private FinishedSpanReceiver<T> receiver;
 
     /**
@@ -48,6 +51,18 @@ public final class BasicTracerBuilder<T> {
     public BasicTracerBuilder<T> activeSpanSource(ActiveSpanSource activeSpanSource) {
         this.activeSpanSource = TracerPreconditions.checkNotNull(
                 activeSpanSource, "activeSpanSource may not be null");
+        return this;
+    }
+
+    /**
+     * Configure the {@link SpanInitiator} to be used by the tracer.
+     *
+     * @param spanInitiator span initiator instance
+     * @return builder instance
+     */
+    public BasicTracerBuilder<T> spanInitiator(SpanInitiator<T> spanInitiator) {
+        this.spanInitiator = TracerPreconditions.checkNotNull(
+                spanInitiator, "spanInitiator may not be null");
         return this;
     }
 
@@ -79,7 +94,11 @@ public final class BasicTracerBuilder<T> {
             activeSpanSource = new ThreadLocalActiveSpanSource();
         }
 
-        return new BasicTracer<>(traceContextHandler, receiver, activeSpanSource, formatters);
+        if (spanInitiator == null) {
+            spanInitiator = new SpanInitiatorImpl<>();
+        }
+
+        return new BasicTracer<>(traceContextHandler, spanInitiator, receiver, activeSpanSource, formatters);
     }
 
     /**

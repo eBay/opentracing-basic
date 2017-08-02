@@ -114,6 +114,28 @@ Tracer tracer = new BasicTracerBuilder<>(traceContextHandler, receiver)
 The Basic Tracer implementation will then leverage the provided
 formatter for inject and extract operations.
 
+### Span Initiators
+
+ When the tracer implementation is creating a new span instance, it provides
+ the opportunity to hook into the creation process by providing a
+ [SpanInitiator](src/main/java/com/ebay/opentracing/basic/SpanInitiator.java)
+ instance.  This allows integration at the front-end of the span whereas
+ the span receiver allows for integration at the back-end.
+ 
+ When called, the initiator should leverage the provided initiator context
+ to create and return the Span instance.  The initiator instance can use this
+ opportunity to decorate or populate data within the span before being used at
+ the call point.
+ 
+ Custom initiators are registered with the Tracer though the `BasicTracerBuilder`: 
+ 
+```
+SpanInitiator initiator = ...
+Tracer tracer = new BasicTracerBuilder<>(traceContextHandler, receiver)
+    .spanInitiator(initiator)
+    .build();
+```
+
 ## References
 
 * [OpenTracing - A vendor-neutral open standard for distributed tracing](http://opentracing.io/)

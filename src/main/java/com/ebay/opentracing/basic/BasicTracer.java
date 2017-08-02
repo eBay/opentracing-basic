@@ -26,16 +26,17 @@ final class BasicTracer<T> implements Tracer {
 
     BasicTracer(
             TraceContextHandler<T> traceContextHandler,
+            SpanInitiator<T> spanInitiator,
             FinishedSpanReceiver<T> finishedSpanReceiver,
             ActiveSpanSource activeSpanSource,
             Formatters<T> formatters) {
         this.traceContextHandler = traceContextHandler;
+        this.spanInitiator = spanInitiator;
         this.spanFinisher = new SpanFinisher<>(finishedSpanReceiver);
         this.activeSpanSource = activeSpanSource;
         this.formatters = formatters;
 
         this.spanInitiatorContext = new SpanInitiatorContextImpl<>(activeSpanSource, spanFinisher);
-        this.spanInitiator = new SpanInitiatorImpl<>();
     }
 
     /**

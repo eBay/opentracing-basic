@@ -1,6 +1,7 @@
 package com.ebay.opentracing.basic;
 
 import io.opentracing.ActiveSpan;
+import io.opentracing.ActiveSpanSource;
 import io.opentracing.BaseSpan;
 import io.opentracing.References;
 import io.opentracing.Span;
@@ -8,6 +9,7 @@ import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
 import mockit.Expectations;
 import mockit.Mocked;
+import mockit.Verifications;
 import mockit.integration.junit4.JMockit;
 import org.junit.Before;
 import org.junit.Test;
@@ -394,6 +396,57 @@ public class TracerFunctionalTest {
                 // Empty
             }
         }
+    }
+
+    @Test
+    public void spanInitiatorCanInterceptSpanCreation(
+            @Mocked final SpanInitiator<TestTraceContext> spanInitiator,
+            @Mocked final Span expected) {
+        TestTraceContextHandler traceContextHandler = new TestTraceContextHandler();
+        uut = new BasicTracerBuilder<>(traceContextHandler, finishedSpanReceiver)
+                .spanInitiator(spanInitiator)
+                .build();
+
+        new Expectations() {{
+            spanInitiator.initiateSpan(
+                    withInstanceOf(SpanInitiatorContext.class),
+                    withInstanceOf(MutableSpanData.class));
+            result = expected;
+        }};
+        Span actual = uut.buildSpan("operation").startManual();
+        assertSame(expected, actual);
+    }
+
+    @Test
+    public void spanInitiatorCanManipulateSpanCreation()
+    {
+        TestTraceContextHandler traceContextHandler = new TestTraceContextHandler();
+        SpanInitiator<TestTraceContext> testInitiator = new SpanInitiator<TestTraceContext>() {
+            @Override
+            public Span initiateSpan(SpanInitiatorContext<TestTraceContext> initiatorContext, MutableSpanData<TestTraceContext> spanData) {
+                ActiveSpanSource activeSpanSource = initiatorContext.getActiveSpanSource();
+                assertNotNull(activeSpanSource);
+
+                spanData.putTag("manipulated", "yes");
+
+                Span span = initiatorContext.createSpan(spanData);
+                assertNotNull(span);
+                return span;
+            }
+        };
+        uut = new BasicTracerBuilder<>(traceContextHandler, finishedSpanReceiver)
+                .spanInitiator(testInitiator)
+                .build();
+
+        uut.buildSpan("operation").startManual().finish();
+        new Verifications() {{
+            SpanData<TestTraceContext> captured;
+            finishedSpanReceiver.spanFinished(captured = withCapture());
+
+            Map<String, String> tags = captured.getTags();
+            String actual = tags.get("manipulated");
+            assertEquals("yes", actual);
+        }};
     }
 
     @Nullable
