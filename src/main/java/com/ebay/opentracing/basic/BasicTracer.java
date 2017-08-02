@@ -22,6 +22,8 @@ final class BasicTracer<T> implements Tracer {
     private final Formatters<T> formatters;
     private final SampleController<T> sampleController;
     private final ActiveSpanSource activeSpanSource;
+    private final SpanInitiatorContext<T> spanInitiatorContext;
+    private final SpanInitiator<T> spanInitiator;
 
     BasicTracer(
             TraceContextHandler<T> traceContextHandler,
@@ -34,6 +36,9 @@ final class BasicTracer<T> implements Tracer {
         this.activeSpanSource = activeSpanSource;
         this.sampleController = sampleController;
         this.formatters = formatters;
+
+        this.spanInitiatorContext = new SpanInitiatorContextImpl<>(activeSpanSource, sampleController, spanFinisher);
+        this.spanInitiator = new SpanInitiatorImpl<>();
     }
 
     /**
@@ -42,7 +47,7 @@ final class BasicTracer<T> implements Tracer {
     @Override
     public SpanBuilder buildSpan(String operationName) {
         TracerPreconditions.checkNotNull(operationName, "operationName may not be null");
-        return new SpanBuilderImpl<>(activeSpanSource, spanFinisher, traceContextHandler, sampleController, operationName);
+        return new SpanBuilderImpl<>(activeSpanSource, spanInitiatorContext, spanInitiator, traceContextHandler, operationName);
     }
 
     /**

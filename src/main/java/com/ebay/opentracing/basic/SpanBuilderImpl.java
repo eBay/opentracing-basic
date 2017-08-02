@@ -23,9 +23,9 @@ import java.util.concurrent.TimeUnit;
  */
 final class SpanBuilderImpl<T> implements Tracer.SpanBuilder {
     private final ActiveSpanSource activeSpanSource;
-    private final SpanFinisher<T> spanFinisher;
+    private final SpanInitiatorContext<T> spanInitiatorContext;
+    private final SpanInitiator<T> spanInitiator;
     private final TraceContextHandler<T> traceContextHandler;
-    private final SampleController<T> sampleController;
     private final String operationName;
 
     private boolean ignoreActiveSpan;
@@ -39,14 +39,14 @@ final class SpanBuilderImpl<T> implements Tracer.SpanBuilder {
 
     SpanBuilderImpl(
             ActiveSpanSource activeSpanSource,
-            SpanFinisher<T> spanFinisher,
+            SpanInitiatorContext<T> spanInitiatorContext,
+            SpanInitiator<T> spanInitiator,
             TraceContextHandler<T> traceContextHandler,
-            SampleController<T> sampleController,
             String operationName) {
         this.activeSpanSource = activeSpanSource;
-        this.spanFinisher = spanFinisher;
+        this.spanInitiatorContext = spanInitiatorContext;
+        this.spanInitiator = spanInitiator;
         this.traceContextHandler = traceContextHandler;
-        this.sampleController = sampleController;
         this.operationName = operationName;
     }
 
@@ -162,12 +162,7 @@ final class SpanBuilderImpl<T> implements Tracer.SpanBuilder {
     @Override
     public Span startManual() {
         SpanState<T> spanState = buildContext();
-        ActiveSpan activeSpan = activeSpanSource.activeSpan();
-        if (activeSpan != null || sampleController.isSampled(spanState)) {
-            return new SpanImpl<>(spanState, spanFinisher);
-        } else {
-            return new UnsampledRootSpan<>(spanState.getSpanContext());
-        }
+        return spanInitiator.initiateSpan(spanInitiatorContext, spanState);
     }
 
     /**

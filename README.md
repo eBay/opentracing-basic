@@ -94,9 +94,14 @@ try (ActiveSpan span = tracer.buildSpan("operation").startActive()) {
 }
 ```
 
- To achieve cross-process operation, tcom/mcumings/opentracing-basic/blob/master/src/main/java/com/ebay/opentracing/basic/Formatter.java)
- interface in order to define how the trace/span context is applied to
- a data carrier of a particular type.  Once defined, the formatter
+## Optional Features
+
+### Formatters
+
+ To achieve cross-process operation, one or more implementation(s) of the
+ [Formatter](src/main/java/com/ebay/opentracing/basic/Formatter.java)
+ interface may be supplied in order to define how the trace/span context
+ is applied to a data carrier of a particular type.  Once defined, the formatter
  should be registered at Tracer- creation time as in the following
  example, replacing the Format with the appropriate type.
 
