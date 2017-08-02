@@ -6,7 +6,6 @@ import io.opentracing.References;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
-import mockit.Delegate;
 import mockit.Expectations;
 import mockit.Mocked;
 import mockit.integration.junit4.JMockit;
@@ -38,9 +37,6 @@ public class TracerFunctionalTest {
     private Provider<String> spanIdProvider;
 
     @Mocked
-    private SampleController<TestTraceContext> sampleController;
-
-    @Mocked
     private FinishedSpanReceiver<TestTraceContext> finishedSpanReceiver;
 
     private Tracer uut;
@@ -48,7 +44,6 @@ public class TracerFunctionalTest {
     @Before
     public void before() throws Exception {
         uut = new BasicTracerBuilder<>(new TestTraceContextHandler(), finishedSpanReceiver)
-                .sampleController(sampleController)
                 .build();
     }
 
@@ -60,7 +55,6 @@ public class TracerFunctionalTest {
 
     @Test
     public void activeSpanWithinSpan() {
-        whenAlwaysSampling();
         try (ActiveSpan span = uut.buildSpan("outer").startActive()) {
             ActiveSpan actual = uut.activeSpan();
             assertSame(span, actual);
@@ -69,7 +63,6 @@ public class TracerFunctionalTest {
 
     @Test
     public void spanContextToStringDoesNotBlowUp() {
-        whenAlwaysSampling();
         try (ActiveSpan span = uut.buildSpan("span").startActive()) {
             String string = span.context().toString();
             assertNotNull(string);
@@ -78,7 +71,6 @@ public class TracerFunctionalTest {
 
     @Test
     public void spanAutoCloseCausesFinish() {
-        whenAlwaysSampling();
         final ArrayList<SpanData<TestTraceContext>> capturedSpanData = new ArrayList<>();
         new Expectations() {{
             finishedSpanReceiver.spanFinished(withCapture(capturedSpanData));
@@ -94,7 +86,6 @@ public class TracerFunctionalTest {
 
     @Test
     public void spanDataToStringDoesNotBlowUp() {
-        whenAlwaysSampling();
         final ArrayList<SpanData<TestTraceContext>> capturedSpanData = new ArrayList<>();
         new Expectations() {{
             finishedSpanReceiver.spanFinished(withCapture(capturedSpanData));
@@ -122,7 +113,6 @@ public class TracerFunctionalTest {
 
     @Test
     public void spanBuilderAsChildOfNullSpanContextShouldNoop() {
-        whenAlwaysSampling();
         final ArrayList<SpanData<TestTraceContext>> capturedSpanData = new ArrayList<>();
         new Expectations() {{
             finishedSpanReceiver.spanFinished(withCapture(capturedSpanData));
@@ -139,7 +129,6 @@ public class TracerFunctionalTest {
 
     @Test
     public void spanBuilderAsChildOfNullSpanShouldNoop() {
-        whenAlwaysSampling();
         final ArrayList<SpanData<TestTraceContext>> capturedSpanData = new ArrayList<>();
         new Expectations() {{
             finishedSpanReceiver.spanFinished(withCapture(capturedSpanData));
@@ -156,7 +145,6 @@ public class TracerFunctionalTest {
 
     @Test
     public void spanBuilderAddNullReferenceShouldNoop() {
-        whenAlwaysSampling();
         final ArrayList<SpanData<TestTraceContext>> capturedSpanData = new ArrayList<>();
         new Expectations() {{
             finishedSpanReceiver.spanFinished(withCapture(capturedSpanData));
@@ -174,7 +162,6 @@ public class TracerFunctionalTest {
     @SuppressWarnings("deprecation") // Testing deprecated method in official API
     @Test
     public void spanLogEvents() {
-        whenAlwaysSampling();
         final ArrayList<SpanData<TestTraceContext>> capturedSpanData = new ArrayList<>();
         new Expectations() {{
             finishedSpanReceiver.spanFinished(withCapture(capturedSpanData));
@@ -227,7 +214,6 @@ public class TracerFunctionalTest {
 
     @Test
     public void spanStartAndFinishTimes() {
-        whenAlwaysSampling();
         final ArrayList<SpanData<TestTraceContext>> capturedSpanData = new ArrayList<>();
         new Expectations() {{
             finishedSpanReceiver.spanFinished(withCapture(capturedSpanData));
@@ -245,7 +231,6 @@ public class TracerFunctionalTest {
 
     @Test
     public void spanUpdatedOperationName() {
-        whenAlwaysSampling();
         final ArrayList<SpanData<TestTraceContext>> capturedSpanData = new ArrayList<>();
         new Expectations() {{
             finishedSpanReceiver.spanFinished(withCapture(capturedSpanData));
@@ -263,7 +248,6 @@ public class TracerFunctionalTest {
 
     @Test
     public void activeSpanWithinNestedSpan() throws Exception {
-        whenAlwaysSampling();
         try (ActiveSpan outerSpan = uut.buildSpan("outer").startActive()) {
             try (ActiveSpan innerSpan = uut.buildSpan("inner").startActive()) {
                 ActiveSpan actual = uut.activeSpan();
@@ -274,8 +258,6 @@ public class TracerFunctionalTest {
 
     @Test
     public void sampledSpanIsReceived() {
-        whenAlwaysSampling();
-
         final ArrayList<SpanData<TestTraceContext>> capturedSpanData = new ArrayList<>();
         new Expectations() {{
             finishedSpanReceiver.spanFinished(withCapture(capturedSpanData));
@@ -290,105 +272,8 @@ public class TracerFunctionalTest {
         assertEquals("spanOperation", spanData.getOperationName());
     }
 
-    @SuppressWarnings("unchecked")
-    @Test
-    public void unsampledRootSpanIsNotReceived() {
-        final ArrayList<SpanData<TestTraceContext>> capturedSpanData = new ArrayList<>();
-        new Expectations() {{
-            sampleController.isSampled(withInstanceOf(SpanData.class));
-            result = new Delegate<SpanData<TestTraceContext>>() {
-                boolean isSampled(SpanData<TestTraceContext> spanData) {
-                    return !"outerSpan".equals(spanData.getOperationName());
-                }
-            };
-
-            finishedSpanReceiver.spanFinished(withCapture(capturedSpanData));
-        }};
-        try (ActiveSpan outerSpan = uut.buildSpan("outerSpan").startActive()) {
-            try (ActiveSpan middleSpan = uut.buildSpan("middleSpan").startActive()) {
-                try (ActiveSpan innerSpan = uut.buildSpan("innerSpan").startActive()) {
-                    // Do stuff
-                }
-            }
-        }
-        assertEquals(2, capturedSpanData.size());
-        SpanData<TestTraceContext> spanData;
-
-        spanData = capturedSpanData.get(0);
-        assertEquals("innerSpan", spanData.getOperationName());
-
-        spanData = capturedSpanData.get(1);
-        assertEquals("middleSpan", spanData.getOperationName());
-    }
-
-    @Test
-    public void unsampledMiddleAndSpansIsReceived() {
-        final ArrayList<SpanData<TestTraceContext>> capturedSpanData = new ArrayList<>();
-        new Expectations() {{
-            sampleController.isSampled(withInstanceOf(SpanData.class));
-            result = new Delegate<SpanData<TestTraceContext>>() {
-                boolean isSampled(SpanData<TestTraceContext> spanData) {
-                    return !"middleSpan".equals(spanData.getOperationName());
-                }
-            };
-
-            finishedSpanReceiver.spanFinished(withCapture(capturedSpanData));
-        }};
-        try (ActiveSpan outerSpan = uut.buildSpan("outerSpan").startActive()) {
-            try (ActiveSpan middleSpan = uut.buildSpan("middleSpan").startActive()) {
-                try (ActiveSpan innerSpan = uut.buildSpan("innerSpan").startActive()) {
-                    // Do stuff
-                }
-            }
-        }
-
-        assertEquals(3, capturedSpanData.size());
-        SpanData<TestTraceContext> spanData;
-
-        spanData = capturedSpanData.get(0);
-        assertEquals("innerSpan", spanData.getOperationName());
-
-        spanData = capturedSpanData.get(1);
-        assertEquals("middleSpan", spanData.getOperationName());
-
-        spanData = capturedSpanData.get(2);
-        assertEquals("outerSpan", spanData.getOperationName());
-    }
-
-    @SuppressWarnings("unchecked")
-    @Test
-    public void unsampledRootSpanBaggageIsPropagated() {
-        final ArrayList<SpanData<TestTraceContext>> capturedSpanData = new ArrayList<>();
-        new Expectations() {{
-            sampleController.isSampled(withInstanceOf(SpanData.class));
-            result = new Delegate<SpanData<TestTraceContext>>() {
-                boolean isSampled(SpanData<TestTraceContext> spanData) {
-                    return !"outerSpan".equals(spanData.getOperationName());
-                }
-            };
-
-            finishedSpanReceiver.spanFinished(withCapture(capturedSpanData));
-        }};
-        try (ActiveSpan outerSpan = uut.buildSpan("outerSpan").startActive()) {
-            outerSpan.setBaggageItem("test", "pass");
-            try (ActiveSpan middleSpan = uut.buildSpan("middleSpan").startActive()) {
-                try (ActiveSpan innerSpan = uut.buildSpan("innerSpan").startActive()) {
-                    // Do stuff
-                }
-            }
-        }
-
-        assertEquals(2, capturedSpanData.size());
-        for (SpanData<TestTraceContext> spanData : capturedSpanData) {
-            String value = locateValue(spanData.getSpanContext().getBaggage().baggageItems(), "test");
-            assertEquals("pass", value);
-        }
-    }
-
     @Test
     public void baggagePropagation() {
-        whenAlwaysSampling();
-
         final ArrayList<SpanData<TestTraceContext>> capturedSpanData = new ArrayList<>();
         new Expectations() {{
             finishedSpanReceiver.spanFinished(withCapture(capturedSpanData));
@@ -437,8 +322,6 @@ public class TracerFunctionalTest {
 
     @Test
     public void spanTagsWork() {
-        whenAlwaysSampling();
-
         final ArrayList<SpanData<TestTraceContext>> capturedSpanData = new ArrayList<>();
         new Expectations() {{
             finishedSpanReceiver.spanFinished(withCapture(capturedSpanData));
@@ -478,7 +361,6 @@ public class TracerFunctionalTest {
             times = 1;
         }};
         uut = new BasicTracerBuilder<>(traceContextHandler, finishedSpanReceiver)
-                .sampleController(sampleController)
                 .build();
 
         Span parent = uut.buildSpan("parent").startManual();
@@ -500,7 +382,6 @@ public class TracerFunctionalTest {
             times = 1;
         }};
         uut = new BasicTracerBuilder<>(traceContextHandler, finishedSpanReceiver)
-                .sampleController(sampleController)
                 .build();
 
         try (ActiveSpan parent = uut.buildSpan("parent").startActive())
@@ -513,15 +394,6 @@ public class TracerFunctionalTest {
                 // Empty
             }
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void whenAlwaysSampling() {
-        new Expectations() {{
-            sampleController.isSampled((SpanData<TestTraceContext>) any);
-            result = true;
-            minTimes = 0;
-        }};
     }
 
     @Nullable

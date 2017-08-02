@@ -23,9 +23,6 @@ public final class BasicTracerBuilder<T> {
     private ActiveSpanSource activeSpanSource;
 
     @Nullable
-    private SampleController<T> sampleController;
-
-    @Nullable
     private FinishedSpanReceiver<T> receiver;
 
     /**
@@ -51,18 +48,6 @@ public final class BasicTracerBuilder<T> {
     public BasicTracerBuilder<T> activeSpanSource(ActiveSpanSource activeSpanSource) {
         this.activeSpanSource = TracerPreconditions.checkNotNull(
                 activeSpanSource, "activeSpanSource may not be null");
-        return this;
-    }
-
-    /**
-     * Configure the sampling controller.  When no controller is configured all traces will be sampled.
-     *
-     * @param sampleController controller instance
-     * @return builder instance
-     */
-    public BasicTracerBuilder<T> sampleController(SampleController<T> sampleController) {
-        this.sampleController = TracerPreconditions.checkNotNull(
-                sampleController, "sampleController may not be null");
         return this;
     }
 
@@ -94,11 +79,7 @@ public final class BasicTracerBuilder<T> {
             activeSpanSource = new ThreadLocalActiveSpanSource();
         }
 
-        if (sampleController == null) {
-            sampleController = new SampleControllerAlways<>();
-        }
-
-        return new BasicTracer<>(traceContextHandler, receiver, activeSpanSource, sampleController, formatters);
+        return new BasicTracer<>(traceContextHandler, receiver, activeSpanSource, formatters);
     }
 
     /**

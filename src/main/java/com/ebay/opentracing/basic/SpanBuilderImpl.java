@@ -169,6 +169,7 @@ final class SpanBuilderImpl<T> implements Tracer.SpanBuilder {
      * {@inheritDoc}
      */
     @Override
+    @Deprecated
     public Span start() {
         return startManual();
     }

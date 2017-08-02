@@ -111,6 +111,7 @@ abstract class BaseSpanImpl<S extends BaseSpan<S>, T> implements BaseSpan<S> {
      * {@inheritDoc}
      */
     @Override
+    @Deprecated
     public final S log(String eventName, Object payload) {
         return log(TimeUnit.MILLISECONDS, System.currentTimeMillis(), eventName, payload);
     }
@@ -119,6 +120,7 @@ abstract class BaseSpanImpl<S extends BaseSpan<S>, T> implements BaseSpan<S> {
      * {@inheritDoc}
      */
     @Override
+    @Deprecated
     public final S log(long timestampMicroseconds, String eventName, Object payload) {
         return log(TimeUnit.MICROSECONDS, timestampMicroseconds, eventName, payload);
     }

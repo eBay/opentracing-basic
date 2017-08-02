@@ -19,13 +19,6 @@ public interface SpanInitiatorContext<T> {
     ActiveSpanSource getActiveSpanSource();
 
     /**
-     * Get the sample controller being used by the tracer.
-     *
-     * @return controller instance
-     */
-    SampleController<T> getSampleController();
-
-    /**
      * Create a span instance from the {@link MutableSpanData} provided.
      *
      * @param spanData span data

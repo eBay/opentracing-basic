@@ -20,7 +20,6 @@ final class BasicTracer<T> implements Tracer {
     private final TraceContextHandler<T> traceContextHandler;
     private final SpanFinisher<T> spanFinisher;
     private final Formatters<T> formatters;
-    private final SampleController<T> sampleController;
     private final ActiveSpanSource activeSpanSource;
     private final SpanInitiatorContext<T> spanInitiatorContext;
     private final SpanInitiator<T> spanInitiator;
@@ -29,15 +28,13 @@ final class BasicTracer<T> implements Tracer {
             TraceContextHandler<T> traceContextHandler,
             FinishedSpanReceiver<T> finishedSpanReceiver,
             ActiveSpanSource activeSpanSource,
-            SampleController<T> sampleController,
             Formatters<T> formatters) {
         this.traceContextHandler = traceContextHandler;
         this.spanFinisher = new SpanFinisher<>(finishedSpanReceiver);
         this.activeSpanSource = activeSpanSource;
-        this.sampleController = sampleController;
         this.formatters = formatters;
 
-        this.spanInitiatorContext = new SpanInitiatorContextImpl<>(activeSpanSource, sampleController, spanFinisher);
+        this.spanInitiatorContext = new SpanInitiatorContextImpl<>(activeSpanSource, spanFinisher);
         this.spanInitiator = new SpanInitiatorImpl<>();
     }
 

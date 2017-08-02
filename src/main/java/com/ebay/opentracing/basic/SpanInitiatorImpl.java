@@ -1,7 +1,5 @@
 package com.ebay.opentracing.basic;
 
-import io.opentracing.ActiveSpan;
-import io.opentracing.ActiveSpanSource;
 import io.opentracing.Span;
 
 /**
@@ -18,15 +16,7 @@ final class SpanInitiatorImpl<T> implements SpanInitiator<T> {
     public Span initiateSpan(
             SpanInitiatorContext<T> initiatorContext,
             MutableSpanData<T> spanData) {
-        ActiveSpanSource activeSpanSource = initiatorContext.getActiveSpanSource();
-        SampleController<T> sampleController = initiatorContext.getSampleController();
-
-        ActiveSpan activeSpan = activeSpanSource.activeSpan();
-        if (activeSpan != null || sampleController.isSampled(spanData)) {
-            return initiatorContext.createSpan(spanData);
-        } else {
-            return new UnsampledRootSpan<>(spanData.getSpanContext());
-        }
+        return initiatorContext.createSpan(spanData);
     }
 
 }
