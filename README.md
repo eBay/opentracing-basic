@@ -1,5 +1,7 @@
 # Basic OpenTracing API Implementation for Java
 
+[![Build Status](https://travis-ci.org/eBay/opentracing-basic.svg?branch=master)](https://travis-ci.org/eBay/opentracing-basic)
+
 ## Introduction
 
  The [OpenTracing API for Java](https://github.com/opentracing/opentracing-java)
