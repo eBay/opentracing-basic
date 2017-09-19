@@ -34,8 +34,8 @@ publishing {
                     appendNode('name', 'opentracing-basic')
                     appendNode('description', 'Basic OpenTracing API implementation')
                     appendNode('scm').with {
-                        appendNode('url', 'https://github.corp.ebay.com/mcumings/opentracing-basic')
-                        appendNode('connection', 'git@github.corp.ebay.com:mcumings/opentracing-basic.git')
+                        appendNode('url', 'https://github.com/eBay/opentracing-basic.git')
+                        appendNode('connection', 'git@github.com:eBay/opentracing-basic.git')
                     }
                     appendNode('licenses').with {
                         appendNode('license').with {
