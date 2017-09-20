@@ -1,9 +1,10 @@
 language: java
 before_cache:
-  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
-  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
 cache:
   directories:
-    - $HOME/.gradle/caches/
-    - $HOME/.gradle/wrapper/
-
+  - $HOME/.gradle/caches/
+  - $HOME/.gradle/wrapper/
+notifications:
+  secure: EqDvWZtUDONd92QHUcnJGSvvPyasATGJSFH2GFAtT7F1lUMfJqZLLSTSfxxLL35KkZN+lLzk1sfhFY4PGQvofCzysvYIPez2sDmS1vEG4RHn2HnQ8MoV2W8Dc9qSjxc+YOzV5P5Z0Dn+fQmpc+qMxPUyaxnCTOQxe5t31oU85CYjXxgpsH8cNh3CVqeZ4IVaFAkx4JhlUY+ILI/eNnNOW/FicXlzjqW924RHZ0TOcUbi9ftihGW0Bt4pXyttZShpFtfR5aScNjg7NcZcNyjJlnZeHyYC7+vC6D8vgiqgHWKS607Ybq34KzG9FbEOwt3yZGdmlqawe2Dqnu8BNICbF/Kz+y/NwecTcgF7gkaLlPdToCfrNWoG285ysYeNWherLLfp7sy0OYtLZizFDk5ia3p1ZKhjPwruSV50z2hWphaxBABGF2Dq6TSfuqtS3Jjq+4K874COrM5b6zo1WaUalzYBa/eFuaEXG2UtmZ/7PPxYs5es4TiUYe7BF6R6jk2D9zTRCeBRdH7DvKYxpwEDBJHqzGlzfzATDkCI3f586TjOMXFrHKhnB8LzwvaHMAN5zqmq84ngtThZX+MnSO1tbkAEu+5mqvZbevilUGqn9ng87L1BL+VZ7YOMgM3OvOlJwGRfqG2/z+lYKrADR5AmyoQ3cv2UNKPEQzNJt8767yU=
