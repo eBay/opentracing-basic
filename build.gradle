@@ -7,6 +7,7 @@ apply plugin: 'maven-publish'
 
 group pkgGroupId
 version pkgVersion
+description 'OpenTracing Basic Bridge Implementation API'
 
 ext {
     bintrayUser = project.hasProperty("bintrayUser") ? bintrayUser : "unknown"
@@ -80,6 +81,7 @@ publishing {
                 asNode().children().last() + {
                     resolveStrategy = DELEGATE_FIRST
                     name "${pkgGroupId}:${project.name}"
+                    description project.description
                     url 'https://github.com/eBay/opentracing-basic.git'
                     licenses {
                         license {
