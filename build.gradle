@@ -38,10 +38,19 @@ bintray {
         name = 'opentracing-basic'
         userOrg = project.ext.bintrayUser
         licenses = ['Apache-2.0']
+        githubRepo = 'eBay/opentracing-basic'
         vcsUrl = 'git@github.com:eBay/opentracing-basic.git'
+        websiteUrl = 'https://github.com/eBay/opentracing-basic'
+        issueTrackerUrl = 'https://github.com/eBay/opentracing-basic/issues'
+        publish = true
 
         version {
             name = pkgVersion
+            vcsTag = "release/${pkgVersion}"
+            released = new Date()
+            gpg {
+                sign = true
+            }
         }
     }
 }
