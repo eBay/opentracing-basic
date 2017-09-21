@@ -1,8 +1,17 @@
+plugins {
+    id "com.jfrog.bintray" version "1.7.3"
+}
+
 apply plugin: 'java-library'
 apply plugin: 'maven-publish'
 
 group pkgGroupId
 version pkgVersion
+
+ext {
+    bintrayUser = project.hasProperty("bintrayUser") ? bintrayUser : "unknown"
+    bintrayApiKey = project.hasProperty("bintrayApiKey") ? bintrayApiKey : "unknown"
+}
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
@@ -20,6 +29,22 @@ dependencies {
     testImplementation 'org.jmockit:jmockit:1.30'
 }
 
+bintray {
+    user = project.ext.bintrayUser
+    key = project.ext.bintrayApiKey
+    publications = ['mavenJava']
+    pkg {
+        repo = 'opentracing-basic'
+        name = 'opentracing-basic'
+        userOrg = project.ext.bintrayUser
+        licenses = ['Apache-2.0']
+        vcsUrl = 'git@github.com:eBay/opentracing-basic.git'
+
+        version {
+            name = pkgVersion
+        }
+    }
+}
 task sourceJar(type: Jar) {
     classifier = 'sources'
     from sourceSets.main.allSource
@@ -31,41 +56,41 @@ task javadocJar(type: Jar) {
     dependsOn tasks.javadoc
 }
 
+artifacts {
+    archives sourceJar, javadocJar
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
-            //artifactId 'opentracing-basic'
             artifact sourceJar
             artifact javadocJar
 
             pom.withXml {
-                asNode().with {
-                    appendNode('packaging', 'jar')
-                    appendNode('name', 'opentracing-basic')
-                    appendNode('description', 'Basic OpenTracing API implementation')
-                    appendNode('scm').with {
-                        appendNode('url', 'https://github.com/eBay/opentracing-basic.git')
-                        appendNode('connection', 'git@github.com:eBay/opentracing-basic.git')
-                    }
-                    appendNode('licenses').with {
-                        appendNode('license').with {
-                            appendNode('name', 'Apache License, Version 2.0')
-                            appendNode('url', 'https://www.apache.org/licenses/LICENSE-2.0')
+                asNode().children().last() + {
+                    resolveStrategy = DELEGATE_FIRST
+                    name "${pkgGroupId}:${project.name}"
+                    url 'https://github.com/eBay/opentracing-basic.git'
+                    licenses {
+                        license {
+                            name 'The Apache Software License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            distribution 'repo'
                         }
                     }
-                    appendNode('organization').with {
-                        appendNode('name', 'eBay Inc.')
-                        appendNode('url', 'https://ebay.com/')
+
+                    scm {
+                        url 'https://github.com/eBay/opentracing-basic.git'
+                        developerConnection 'scm:git:ssh://github.com:eBay/opentracing-basic.git'
+                        connection 'git@github.com:eBay/opentracing-basic.git'
                     }
-                    appendNode('developers').with {
-                        appendNode('developer').with {
-                            appendNode('id', 'mcumings')
-                            appendNode('name', 'Mike Cumings')
-                            appendNode('email', 'mcumings@ebay.com')
-                            appendNode('organization', 'eBay Inc.')
-                            appendNode('organizationUrl', 'https://ebay.com/')
-                            appendNode('timezone', '-8')
+
+                    developers {
+                        developer {
+                            id 'mcumings'
+                            name 'Mike Cumings'
+                            email 'mcumings@ebay.com'
                         }
                     }
                 }
@@ -76,3 +101,4 @@ publishing {
         mavenLocal()
     }
 }
+
