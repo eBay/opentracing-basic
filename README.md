@@ -1,7 +1,7 @@
 # Basic OpenTracing API Implementation for Java
 
 [![Build Status](https://travis-ci.org/eBay/opentracing-basic.svg?branch=master)](https://travis-ci.org/eBay/opentracing-basic)
-[ ![Download](https://api.bintray.com/packages/mcumings/opentracing-basic/opentracing-basic/images/download.svg) ](https://bintray.com/mcumings/opentracing-basic/opentracing-basic/_latestVersion)
+[![Download](https://api.bintray.com/packages/mcumings/opentracing-basic/opentracing-basic/images/download.svg) ](https://bintray.com/mcumings/opentracing-basic/opentracing-basic/_latestVersion)
 
 ## Introduction
 
@@ -20,41 +20,53 @@
 
 ## Status
 
- This project is currently in a pre-release state.  The API should be
- considered to be unstable and the implementation is not yet optimized.
-
- No artifacts are currently being published to any repositories.
+ This project is currently in beta.  The API should be considered to be
+ unstable and the implementation is not yet optimized.
 
 ## Obtaining the Library
 
- For the time being, obtain the artifacts by cloning this repository
- and then running the following command:
-
-```
-$ ./gradlew clean publishToMavenLocal
-
-```
-
- This will perform the build and install the artifacts in your local
- maven repository.  Once installed you can access the artifacts as
- follows:
+ At the moment, this library is not yet being synced to jcenter or maven
+ central repositories.
 
 ### Gradle:
 
-```
+```groovy
+repositories {
+    maven {
+        url  "https://dl.bintray.com/mcumings/opentracing-basic" 
+    }
+}
+
 dependencies {
-    compile 'com.ebay.opentracing:opentracing-basic:0.0.0'
+    compile 'com.ebay.opentracing:opentracing-basic:1.0.0'
 }
 ```
 
 ### Maven:
 
+Until central repository sync is configured, the following repository configuration
+must be used:
+```xml
+            <repositories>
+                <repository>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                    <id>bintray-mcumings-opentracing-basic</id>
+                    <name>bintray</name>
+                    <url>https://dl.bintray.com/mcumings/opentracing-basic</url>
+                </repository>
+            </repositories>
 ```
+
+The dependency may then be added as follows:
+
+```xml
 <dependencies>
     <dependency>
         <groupId>com.ebay.opentracing</groupId>
         <artifactId>opentracing-basic</artifactId>
-        <version>0.0.0</version>
+        <version>1.0.0</version>
     </dependency>
 </dependencies>
 ```
