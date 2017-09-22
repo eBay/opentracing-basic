@@ -25,53 +25,32 @@
 
 ## Obtaining the Library
 
- At the moment, this library is not yet being synced to jcenter or maven
- central repositories.
+ This library is distributed via both jcenter and maven central repositories.
+ The latest version number is represented in the "Download" badge at the top of
+ this page.  To use the library, include it as a dependency in your project as
+ follows:
 
-### Gradle:
+#### Gradle:
 
 ```groovy
-repositories {
-    maven {
-        url  "https://dl.bintray.com/mcumings/opentracing-basic" 
-    }
-}
-
 dependencies {
-    compile 'com.ebay.opentracing:opentracing-basic:1.0.0'
+    compile 'com.ebay.opentracing:opentracing-basic:${version}'
 }
 ```
 
-### Maven:
-
-Until central repository sync is configured, the following repository configuration
-must be used:
-```xml
-            <repositories>
-                <repository>
-                    <snapshots>
-                        <enabled>false</enabled>
-                    </snapshots>
-                    <id>bintray-mcumings-opentracing-basic</id>
-                    <name>bintray</name>
-                    <url>https://dl.bintray.com/mcumings/opentracing-basic</url>
-                </repository>
-            </repositories>
-```
-
-The dependency may then be added as follows:
+#### Maven:
 
 ```xml
 <dependencies>
     <dependency>
         <groupId>com.ebay.opentracing</groupId>
         <artifactId>opentracing-basic</artifactId>
-        <version>1.0.0</version>
+        <version>${version}</version>
     </dependency>
 </dependencies>
 ```
 
-## Usage
+#### Usage
 
  At a high level, the use of this library requires the developer to
  do the following:
