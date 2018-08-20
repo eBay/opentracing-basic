@@ -28,13 +28,15 @@ import java.util.concurrent.TimeUnit;
  * @param <S> span class type
  * @param <T> trace context type
  */
-abstract class BaseSpanImpl<S extends Span, T> implements Span {
+class BaseSpanImpl<S extends Span, T> implements Span {
     private static final String DEFAULT_EVENT_NAME = "event";
 
     private final MutableSpanData<T> spanState;
+    private final SpanFinisher<T> spanFinisher;
 
-    BaseSpanImpl(MutableSpanData<T> spanState) {
-        this.spanState = TracerPreconditions.checkNotNull(spanState);
+    BaseSpanImpl(MutableSpanData<T> spanState, SpanFinisher<T> spanFinisher) {
+        this.spanState = spanState;
+        this.spanFinisher = spanFinisher;
     }
 
     /**
@@ -137,6 +139,24 @@ abstract class BaseSpanImpl<S extends Span, T> implements Span {
     public final S log(Map<String, ?> fields) {
         return logAll(TimeUnit.MILLISECONDS, System.currentTimeMillis(), fields);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void finish() {
+        spanFinisher.finish(spanState);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void finish(long finishMicros) {
+        spanFinisher.finish(spanState, TimeUnit.MICROSECONDS, finishMicros);
+    }
+
+
 
     /**
      * {@inheritDoc}
