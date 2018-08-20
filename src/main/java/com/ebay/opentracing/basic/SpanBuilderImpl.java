@@ -16,10 +16,9 @@
 
 package com.ebay.opentracing.basic;
 
-import io.opentracing.ActiveSpan;
-import io.opentracing.ActiveSpanSource;
-import io.opentracing.BaseSpan;
 import io.opentracing.References;
+import io.opentracing.Scope;
+import io.opentracing.ScopeManager;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
@@ -38,7 +37,7 @@ import java.util.concurrent.TimeUnit;
  * @param <T> trace context type
  */
 final class SpanBuilderImpl<T> implements Tracer.SpanBuilder {
-    private final ActiveSpanSource activeSpanSource;
+    private final ScopeManager scopeManager;
     private final SpanInitiatorContext<T> spanInitiatorContext;
     private final SpanInitiator<T> spanInitiator;
     private final TraceContextHandler<T> traceContextHandler;
@@ -54,12 +53,12 @@ final class SpanBuilderImpl<T> implements Tracer.SpanBuilder {
     private Map<String, String> tags;
 
     SpanBuilderImpl(
-            ActiveSpanSource activeSpanSource,
+            ScopeManager scopeManager,
             SpanInitiatorContext<T> spanInitiatorContext,
             SpanInitiator<T> spanInitiator,
             TraceContextHandler<T> traceContextHandler,
             String operationName) {
-        this.activeSpanSource = activeSpanSource;
+        this.scopeManager = scopeManager;
         this.spanInitiatorContext = spanInitiatorContext;
         this.spanInitiator = spanInitiator;
         this.traceContextHandler = traceContextHandler;
@@ -78,7 +77,7 @@ final class SpanBuilderImpl<T> implements Tracer.SpanBuilder {
      * {@inheritDoc}
      */
     @Override
-    public Tracer.SpanBuilder asChildOf(BaseSpan<?> parent) {
+    public Tracer.SpanBuilder asChildOf(Span parent) {
         if (parent == null)
             return this;
 
@@ -163,22 +162,10 @@ final class SpanBuilderImpl<T> implements Tracer.SpanBuilder {
         return this;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public ActiveSpan startActive() {
-        Span span = startManual();
-        return activeSpanSource.makeActive(span);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Span startManual() {
-        SpanState<T> spanState = buildContext();
-        return spanInitiator.initiateSpan(spanInitiatorContext, spanState);
+    public Scope startActive(boolean finishSpanOnClose) {
+        Span span = start();
+        return scopeManager.activate(span, finishSpanOnClose);
     }
 
     /**
@@ -186,23 +173,39 @@ final class SpanBuilderImpl<T> implements Tracer.SpanBuilder {
      */
     @Override
     @Deprecated
+    public Span startManual() {
+        return start();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Span start() {
-        return startManual();
+        SpanState<T> spanState = buildContext();
+        return spanInitiator.initiateSpan(spanInitiatorContext, spanState);
     }
 
     private SpanState<T> buildContext() {
-        ActiveSpan activeSpan = activeSpanSource.activeSpan();
-
-        @SuppressWarnings("unchecked")
-        InternalSpanContext<T> activeContext = (InternalSpanContext<T>) (activeSpan == null ? null : activeSpan.context());
-
-        // Implicit child-of active span relationship
-        if (references == null && activeContext != null && !ignoreActiveSpan) {
-            references = Collections.singletonMap(References.CHILD_OF, Collections.singletonList(activeContext));
-        }
+        ScopeManager scopeManager = this.scopeManager;
 
         if (references == null) {
-            references = Collections.emptyMap();
+            Scope activeScope = scopeManager.active();
+            if (activeScope != null) {
+                Span span = activeScope.span();
+
+                @SuppressWarnings("unchecked")
+                InternalSpanContext<T> activeContext = (InternalSpanContext<T>) span.context();
+
+                // Implicit child-of active span relationship
+                if (activeContext != null && !ignoreActiveSpan) {
+                    references = Collections.singletonMap(References.CHILD_OF, Collections.singletonList(activeContext));
+                }
+            }
+
+            if (references == null) {
+                references = Collections.emptyMap();
+            }
         }
 
         InternalSpanContext<T> internalSpanContext;

@@ -16,10 +16,9 @@
 
 package com.ebay.opentracing.basic;
 
-import io.opentracing.ActiveSpan;
-import io.opentracing.ActiveSpanSource;
-import io.opentracing.BaseSpan;
 import io.opentracing.References;
+import io.opentracing.Scope;
+import io.opentracing.ScopeManager;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
@@ -66,23 +65,23 @@ public class TracerFunctionalTest {
     }
 
     @Test
-    public void noActiveSpanOutsideOfTrace() {
-        ActiveSpan actual = uut.activeSpan();
+    public void noSpanOutsideOfTrace() {
+        Span actual = uut.activeSpan();
         assertNull(actual);
     }
 
     @Test
     public void activeSpanWithinSpan() {
-        try (ActiveSpan span = uut.buildSpan("outer").startActive()) {
-            ActiveSpan actual = uut.activeSpan();
-            assertSame(span, actual);
+        try (Scope scope = uut.buildSpan("outer").startActive(true)) {
+            Span actual = uut.activeSpan();
+            assertSame(scope.span(), actual);
         }
     }
 
     @Test
     public void spanContextToStringDoesNotBlowUp() {
-        try (ActiveSpan span = uut.buildSpan("span").startActive()) {
-            String string = span.context().toString();
+        try (Scope scope = uut.buildSpan("span").startActive(true)) {
+            String string = scope.span().context().toString();
             assertNotNull(string);
         }
     }
@@ -95,7 +94,7 @@ public class TracerFunctionalTest {
             times = 1;
         }};
 
-        try (ActiveSpan span = uut.buildSpan("spanOperation").startActive()) {
+        try (Scope scope = uut.buildSpan("spanOperation").startActive(true)) {
             // Do stuff
         }
 
@@ -109,16 +108,16 @@ public class TracerFunctionalTest {
             finishedSpanReceiver.spanFinished(withCapture(capturedSpanData));
         }};
 
-        try (ActiveSpan outerSpan = uut.buildSpan("outerSpan").startActive()) {
-            Span anotherSpan = uut.buildSpan("anotherSpan").startManual();
+        try (Scope outerScope = uut.buildSpan("outerSpan").startActive(true)) {
+            Span anotherSpan = uut.buildSpan("anotherSpan").start();
             anotherSpan.finish();
 
-            try (ActiveSpan childSpan = uut.buildSpan("childSpan")
-                    .asChildOf(outerSpan)
+            try (Scope scope = uut.buildSpan("childSpan")
+                    .asChildOf(outerScope.span())
                     .addReference(References.FOLLOWS_FROM, anotherSpan.context())
                     .withTag("tag1", "value1")
                     .withTag("tag2", "value2")
-                    .startActive()) {
+                    .startActive(true)) {
                 // Do stuff
             }
         }
@@ -135,9 +134,9 @@ public class TracerFunctionalTest {
         new Expectations() {{
             finishedSpanReceiver.spanFinished(withCapture(capturedSpanData));
         }};
-        try (ActiveSpan span = uut.buildSpan("outer")
+        try (Scope scope = uut.buildSpan("outer")
                 .asChildOf((SpanContext) null)
-                .startActive()) {
+                .startActive(true)) {
         }
         assertEquals(1, capturedSpanData.size());
         SpanData<TestTraceContext> spanData = capturedSpanData.get(0);
@@ -151,9 +150,9 @@ public class TracerFunctionalTest {
         new Expectations() {{
             finishedSpanReceiver.spanFinished(withCapture(capturedSpanData));
         }};
-        try (ActiveSpan span = uut.buildSpan("outer")
-                .asChildOf((BaseSpan<?>) null)
-                .startActive()) {
+        try (Scope scope = uut.buildSpan("outer")
+                .asChildOf((Span) null)
+                .startActive(true)) {
         }
         assertEquals(1, capturedSpanData.size());
         SpanData<TestTraceContext> spanData = capturedSpanData.get(0);
@@ -167,9 +166,9 @@ public class TracerFunctionalTest {
         new Expectations() {{
             finishedSpanReceiver.spanFinished(withCapture(capturedSpanData));
         }};
-        try (ActiveSpan span = uut.buildSpan("outer")
+        try (Scope scope = uut.buildSpan("outer")
                 .addReference(References.CHILD_OF, null)
-                .startActive()) {
+                .startActive(true)) {
         }
         assertEquals(1, capturedSpanData.size());
         SpanData<TestTraceContext> spanData = capturedSpanData.get(0);
@@ -194,9 +193,9 @@ public class TracerFunctionalTest {
         mapWithoutTimestamp.put("without1", "val1");
         mapWithoutTimestamp.put("without2", "val2");
 
-        try (ActiveSpan span = uut.buildSpan("spanOperation").startActive()) {
+        try (Scope scope = uut.buildSpan("spanOperation").startActive(true)) {
+            Span span = scope.span();
             span.log("no timestamp");
-            span.log("eventName", "eventValue");
             span.log(12345L, "with timestamp");
             span.log(mapWithoutTimestamp);
             span.log(54321L, mapWithTimestamp);
@@ -205,20 +204,20 @@ public class TracerFunctionalTest {
         assertEquals(1, capturedSpanData.size());
         SpanData<TestTraceContext> spanData = capturedSpanData.get(0);
         List<LogEvent> logEvents = spanData.getLogEvents();
-        assertEquals(7, logEvents.size());
+        assertEquals(6, logEvents.size());
         List<String> logEventStrings = new ArrayList<>(logEvents.size());
         for (LogEvent logEvent : logEvents) {
-            logEventStrings.add(logEvent.getEventName()
+            String eventString = logEvent.getEventName()
                     + "@" + logEvent.getTimeStamp(TimeUnit.MICROSECONDS)
-                    + "=" + logEvent.getPayload());
+                    + "=" + logEvent.getPayload();
+            System.out.println("Saw event: " + eventString);
+            logEventStrings.add(eventString);
         }
         assertTrue(logEventStrings.remove("event@12345=with timestamp"));
         assertTrue(logEventStrings.remove("with1@54321=val1"));
         assertTrue(logEventStrings.remove("with2@54321=val2"));
         for (String logEventString : logEventStrings) {
-            if (logEventString.startsWith("eventName@")) {
-                assertTrue(logEventString.endsWith("=eventValue"));
-            } else if (logEventString.startsWith("without1@")) {
+            if (logEventString.startsWith("without1@")) {
                 assertTrue(logEventString.endsWith("=val1"));
             } else if (logEventString.startsWith("without2@")) {
                 assertTrue(logEventString.endsWith("=val2"));
@@ -238,7 +237,7 @@ public class TracerFunctionalTest {
             times = 1;
         }};
 
-        Span span = uut.buildSpan("spanOperation").withStartTimestamp(12345L).startManual();
+        Span span = uut.buildSpan("spanOperation").withStartTimestamp(12345L).start();
         span.finish(13682L);
 
         assertEquals(1, capturedSpanData.size());
@@ -255,8 +254,8 @@ public class TracerFunctionalTest {
             times = 1;
         }};
 
-        try (ActiveSpan span = uut.buildSpan("initial").startActive()) {
-            span.setOperationName("expected");
+        try (Scope scope = uut.buildSpan("initial").startActive(true)) {
+            scope.span().setOperationName("expected");
         }
 
         assertEquals(1, capturedSpanData.size());
@@ -266,10 +265,10 @@ public class TracerFunctionalTest {
 
     @Test
     public void activeSpanWithinNestedSpan() throws Exception {
-        try (ActiveSpan outerSpan = uut.buildSpan("outer").startActive()) {
-            try (ActiveSpan innerSpan = uut.buildSpan("inner").startActive()) {
-                ActiveSpan actual = uut.activeSpan();
-                assertSame(innerSpan, actual);
+        try (Scope outerScope = uut.buildSpan("outer").startActive(true)) {
+            try (Scope scope = uut.buildSpan("inner").startActive(true)) {
+                Span actual = uut.activeSpan();
+                assertSame(scope.span(), actual);
             }
         }
     }
@@ -281,7 +280,7 @@ public class TracerFunctionalTest {
             finishedSpanReceiver.spanFinished(withCapture(capturedSpanData));
             times = 1;
         }};
-        try (ActiveSpan outerSpan = uut.buildSpan("spanOperation").startActive()) {
+        try (Scope scope = uut.buildSpan("spanOperation").startActive(true)) {
             // Do stuff
         }
 
@@ -298,15 +297,18 @@ public class TracerFunctionalTest {
             times = 3;
         }};
 
-        try (ActiveSpan outer = uut.buildSpan("outer").startActive()) {
+        try (Scope outerScope= uut.buildSpan("outer").startActive(true)) {
+            Span outer = outerScope.span();
             outer.setBaggageItem("outer", "1");
             assertEquals("1", outer.getBaggageItem("outer"));
-            try (ActiveSpan middle = uut.buildSpan("middle").startActive()) {
+            try (Scope middleScope = uut.buildSpan("middle").startActive(true)) {
+                Span middle = middleScope.span();
                 middle.setBaggageItem("middle", "2");
                 assertEquals("1", middle.getBaggageItem("outer"));
                 assertEquals("2", middle.getBaggageItem("middle"));
                 assertNull(outer.getBaggageItem("middle"));
-                try (ActiveSpan inner = uut.buildSpan("inner").startActive()) {
+                try (Scope scope = uut.buildSpan("inner").startActive(true)) {
+                    Span inner = scope.span();
                     inner.setBaggageItem("inner", "3");
                     assertEquals("1", inner.getBaggageItem("outer"));
                     assertEquals("2", inner.getBaggageItem("middle"));
@@ -345,11 +347,12 @@ public class TracerFunctionalTest {
             finishedSpanReceiver.spanFinished(withCapture(capturedSpanData));
             times = 1;
         }};
-        try (ActiveSpan span = uut.buildSpan("spanOperation")
+        try (Scope scope = uut.buildSpan("spanOperation")
                 .withTag("initial1", "1")
                 .withTag("initial2", true)
                 .withTag("initial3", 5)
-                .startActive()) {
+                .startActive(true)) {
+            Span span = scope.span();
             span.setTag("tag1", "value1");
             span.setTag("tag2", true);
             span.setTag("tag3", 37);
@@ -368,7 +371,7 @@ public class TracerFunctionalTest {
     }
 
     @Test
-    public void spanBuilderWithReferenceShouldCallHandlerWithReferencesWhenNoActiveSpan() {
+    public void spanBuilderWithReferenceShouldCallHandlerWithReferencesWhenNoSpan() {
         final TestTraceContextHandler traceContextHandler = new TestTraceContextHandler();
         new Expectations(traceContextHandler)
         {{
@@ -381,15 +384,15 @@ public class TracerFunctionalTest {
         uut = new BasicTracerBuilder<>(traceContextHandler, finishedSpanReceiver)
                 .build();
 
-        Span parent = uut.buildSpan("parent").startManual();
-        Span child = uut.buildSpan("child").asChildOf(parent.context()).startManual();
+        Span parent = uut.buildSpan("parent").start();
+        Span child = uut.buildSpan("child").asChildOf(parent.context()).start();
 
         child.finish();
         parent.finish();
     }
 
     @Test
-    public void spanBuilderWithReferenceWhenIgnoreActiveSpanShouldCallHandlerWithReferences() {
+    public void spanBuilderWithReferenceWhenIgnoreSpanShouldCallHandlerWithReferences() {
         final TestTraceContextHandler traceContextHandler = new TestTraceContextHandler();
         new Expectations(traceContextHandler)
         {{
@@ -402,12 +405,12 @@ public class TracerFunctionalTest {
         uut = new BasicTracerBuilder<>(traceContextHandler, finishedSpanReceiver)
                 .build();
 
-        try (ActiveSpan parent = uut.buildSpan("parent").startActive())
+        try (Scope parentScope = uut.buildSpan("parent").startActive(true))
         {
-            try (ActiveSpan child = uut.buildSpan("child")
+            try (Scope childScope = uut.buildSpan("child")
                     .ignoreActiveSpan()
-                    .asChildOf(parent.context())
-                    .startActive())
+                    .asChildOf(parentScope.span().context())
+                    .startActive(true))
             {
                 // Empty
             }
@@ -429,7 +432,7 @@ public class TracerFunctionalTest {
                     withInstanceOf(MutableSpanData.class));
             result = expected;
         }};
-        Span actual = uut.buildSpan("operation").startManual();
+        Span actual = uut.buildSpan("operation").start();
         assertSame(expected, actual);
     }
 
@@ -440,8 +443,8 @@ public class TracerFunctionalTest {
         SpanInitiator<TestTraceContext> testInitiator = new SpanInitiator<TestTraceContext>() {
             @Override
             public Span initiateSpan(SpanInitiatorContext<TestTraceContext> initiatorContext, MutableSpanData<TestTraceContext> spanData) {
-                ActiveSpanSource activeSpanSource = initiatorContext.getActiveSpanSource();
-                assertNotNull(activeSpanSource);
+                ScopeManager scopeManager = initiatorContext.getScopeManager();
+                assertNotNull(scopeManager);
 
                 spanData.putTag("manipulated", "yes");
 
@@ -454,7 +457,7 @@ public class TracerFunctionalTest {
                 .spanInitiator(testInitiator)
                 .build();
 
-        uut.buildSpan("operation").startManual().finish();
+        uut.buildSpan("operation").start().finish();
         new Verifications() {{
             SpanData<TestTraceContext> captured;
             finishedSpanReceiver.spanFinished(captured = withCapture());

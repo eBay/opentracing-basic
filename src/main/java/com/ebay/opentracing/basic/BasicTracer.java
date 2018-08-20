@@ -16,8 +16,8 @@
 
 package com.ebay.opentracing.basic;
 
-import io.opentracing.ActiveSpan;
-import io.opentracing.ActiveSpanSource;
+import io.opentracing.Scope;
+import io.opentracing.ScopeManager;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
@@ -36,7 +36,7 @@ final class BasicTracer<T> implements Tracer {
     private final TraceContextHandler<T> traceContextHandler;
     private final SpanFinisher<T> spanFinisher;
     private final Formatters<T> formatters;
-    private final ActiveSpanSource activeSpanSource;
+    private final ScopeManager scopeManager;
     private final SpanInitiatorContext<T> spanInitiatorContext;
     private final SpanInitiator<T> spanInitiator;
 
@@ -44,15 +44,15 @@ final class BasicTracer<T> implements Tracer {
             TraceContextHandler<T> traceContextHandler,
             SpanInitiator<T> spanInitiator,
             FinishedSpanReceiver<T> finishedSpanReceiver,
-            ActiveSpanSource activeSpanSource,
+            ScopeManager scopeManager,
             Formatters<T> formatters) {
         this.traceContextHandler = traceContextHandler;
         this.spanInitiator = spanInitiator;
         this.spanFinisher = new SpanFinisher<>(finishedSpanReceiver);
-        this.activeSpanSource = activeSpanSource;
+        this.scopeManager = scopeManager;
         this.formatters = formatters;
 
-        this.spanInitiatorContext = new SpanInitiatorContextImpl<>(activeSpanSource, spanFinisher);
+        this.spanInitiatorContext = new SpanInitiatorContextImpl<>(scopeManager, spanFinisher);
     }
 
     /**
@@ -61,7 +61,7 @@ final class BasicTracer<T> implements Tracer {
     @Override
     public SpanBuilder buildSpan(String operationName) {
         TracerPreconditions.checkNotNull(operationName, "operationName may not be null");
-        return new SpanBuilderImpl<>(activeSpanSource, spanInitiatorContext, spanInitiator, traceContextHandler, operationName);
+        return new SpanBuilderImpl<>(scopeManager, spanInitiatorContext, spanInitiator, traceContextHandler, operationName);
     }
 
     /**
@@ -98,16 +98,17 @@ final class BasicTracer<T> implements Tracer {
      * {@inheritDoc}
      */
     @Override
-    public ActiveSpan activeSpan() {
-        return activeSpanSource.activeSpan();
+    public Span activeSpan() {
+        Scope activeScope = scopeManager.active();
+        return (activeScope == null) ? null : activeScope.span();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ActiveSpan makeActive(Span span) {
-        return activeSpanSource.makeActive(span);
+    public ScopeManager scopeManager() {
+        return scopeManager;
     }
 
 }

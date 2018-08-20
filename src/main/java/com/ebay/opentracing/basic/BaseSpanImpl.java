@@ -15,7 +15,7 @@
  */
 package com.ebay.opentracing.basic;
 
-import io.opentracing.BaseSpan;
+import io.opentracing.Span;
 import io.opentracing.SpanContext;
 
 import java.util.Map;
@@ -23,12 +23,12 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Base class for the span implementation which implements the methods in the corresponding
- * {@link BaseSpan} interface.
+ * {@link Span} interface.
  *
  * @param <S> span class type
  * @param <T> trace context type
  */
-abstract class BaseSpanImpl<S extends BaseSpan<S>, T> implements BaseSpan<S> {
+abstract class BaseSpanImpl<S extends Span, T> implements Span {
     private static final String DEFAULT_EVENT_NAME = "event";
 
     private final MutableSpanData<T> spanState;
@@ -88,7 +88,7 @@ abstract class BaseSpanImpl<S extends BaseSpan<S>, T> implements BaseSpan<S> {
      */
     @Override
     public final S log(long timestampMicroseconds, String event) {
-        return log(timestampMicroseconds, DEFAULT_EVENT_NAME, event);
+        return log(TimeUnit.MICROSECONDS, timestampMicroseconds, DEFAULT_EVENT_NAME, event);
     }
 
     /**
@@ -120,24 +120,6 @@ abstract class BaseSpanImpl<S extends BaseSpan<S>, T> implements BaseSpan<S> {
     public final S setOperationName(String operationName) {
         spanState.setOperationName(operationName);
         return (S) this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Deprecated
-    public final S log(String eventName, Object payload) {
-        return log(TimeUnit.MILLISECONDS, System.currentTimeMillis(), eventName, payload);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Deprecated
-    public final S log(long timestampMicroseconds, String eventName, Object payload) {
-        return log(TimeUnit.MICROSECONDS, timestampMicroseconds, eventName, payload);
     }
 
     /**

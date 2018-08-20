@@ -16,12 +16,12 @@
 
 package com.ebay.opentracing.basic;
 
-import io.opentracing.ActiveSpanSource;
+import io.opentracing.ScopeManager;
 import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
 import io.opentracing.propagation.Format;
 import io.opentracing.util.GlobalTracer;
-import io.opentracing.util.ThreadLocalActiveSpanSource;
+import io.opentracing.util.ThreadLocalScopeManager;
 
 import javax.annotation.Nullable;
 
@@ -36,7 +36,7 @@ public final class BasicTracerBuilder<T> {
     private final TraceContextHandler<T> traceContextHandler;
 
     @Nullable
-    private ActiveSpanSource activeSpanSource;
+    private ScopeManager scopeManager;
 
     @Nullable
     private SpanInitiator<T> spanInitiator;
@@ -58,15 +58,15 @@ public final class BasicTracerBuilder<T> {
     }
 
     /**
-     * Configure the {@link ActiveSpanSource} to be used by the tracer.  When no source is configured then
-     * the {@link io.opentracing.util.ThreadLocalActiveSpanSource} will be used.
+     * Configure the {@link ScopeManager} to be used by the tracer.  When no source is configured then
+     * the {@link io.opentracing.util.ThreadLocalScopeManager} will be used.
      *
-     * @param activeSpanSource active span source instance
+     * @param scopeManager active span source instance
      * @return builder instance
      */
-    public BasicTracerBuilder<T> activeSpanSource(ActiveSpanSource activeSpanSource) {
-        this.activeSpanSource = TracerPreconditions.checkNotNull(
-                activeSpanSource, "activeSpanSource may not be null");
+    public BasicTracerBuilder<T> scopeManager(ScopeManager scopeManager) {
+        this.scopeManager = TracerPreconditions.checkNotNull(
+                scopeManager, "scopeManager may not be null");
         return this;
     }
 
@@ -106,15 +106,15 @@ public final class BasicTracerBuilder<T> {
      * @return tracer instance
      */
     public Tracer build() {
-        if (activeSpanSource == null) {
-            activeSpanSource = new ThreadLocalActiveSpanSource();
+        if (scopeManager == null) {
+            scopeManager = new ThreadLocalScopeManager();
         }
 
         if (spanInitiator == null) {
             spanInitiator = new SpanInitiatorImpl<>();
         }
 
-        return new BasicTracer<>(traceContextHandler, spanInitiator, receiver, activeSpanSource, formatters);
+        return new BasicTracer<>(traceContextHandler, spanInitiator, receiver, scopeManager, formatters);
     }
 
     /**

@@ -16,7 +16,7 @@
 
 package com.ebay.opentracing.basic;
 
-import io.opentracing.ActiveSpanSource;
+import io.opentracing.ScopeManager;
 import io.opentracing.Span;
 
 /**
@@ -28,11 +28,11 @@ import io.opentracing.Span;
 public interface SpanInitiatorContext<T> {
 
     /**
-     * Get the {@link ActiveSpanSource} being used by the tracer.
+     * Get the {@link ScopeManager} being used by the tracer.
      *
      * @return source instance
      */
-    ActiveSpanSource getActiveSpanSource();
+    ScopeManager getScopeManager();
 
     /**
      * Create a span instance from the {@link MutableSpanData} provided.
