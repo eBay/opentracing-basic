@@ -24,6 +24,7 @@ import io.opentracing.util.GlobalTracer;
 import io.opentracing.util.ThreadLocalScopeManager;
 
 import javax.annotation.Nullable;
+import java.util.Objects;
 
 /**
  * Builder for creating instances of {@link BasicTracer}.
@@ -52,9 +53,9 @@ public final class BasicTracerBuilder<T> {
      * @param receiver            receiver instance
      */
     public BasicTracerBuilder(TraceContextHandler<T> traceContextHandler, FinishedSpanReceiver<T> receiver) {
-        this.traceContextHandler = TracerPreconditions.checkNotNull(
+        this.traceContextHandler = Objects.requireNonNull(
                 traceContextHandler, "traceContextHandler may not be null");
-        this.receiver = TracerPreconditions.checkNotNull(receiver, "receiver may not be null");
+        this.receiver = Objects.requireNonNull(receiver, "receiver may not be null");
     }
 
     /**
@@ -65,7 +66,7 @@ public final class BasicTracerBuilder<T> {
      * @return builder instance
      */
     public BasicTracerBuilder<T> scopeManager(ScopeManager scopeManager) {
-        this.scopeManager = TracerPreconditions.checkNotNull(
+        this.scopeManager = Objects.requireNonNull(
                 scopeManager, "scopeManager may not be null");
         return this;
     }
@@ -77,7 +78,7 @@ public final class BasicTracerBuilder<T> {
      * @return builder instance
      */
     public BasicTracerBuilder<T> spanInitiator(SpanInitiator<T> spanInitiator) {
-        this.spanInitiator = TracerPreconditions.checkNotNull(
+        this.spanInitiator = Objects.requireNonNull(
                 spanInitiator, "spanInitiator may not be null");
         return this;
     }
@@ -94,8 +95,8 @@ public final class BasicTracerBuilder<T> {
      * @return builder instance
      */
     public <C> BasicTracerBuilder<T> registerFormatter(Format<C> format, Formatter<T, C> formatter) {
-        TracerPreconditions.checkNotNull(format, "format may not be null");
-        TracerPreconditions.checkNotNull(formatter, "formatter may not be null");
+        Objects.requireNonNull(format, "format may not be null");
+        Objects.requireNonNull(formatter, "formatter may not be null");
         formatters.register(format, formatter);
         return this;
     }

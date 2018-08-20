@@ -20,6 +20,7 @@ import io.opentracing.SpanContext;
 
 import javax.annotation.Nullable;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Implementation of the baggage portion of a {@link SpanContext}.  Each {@link Baggage} instance is immutable
@@ -35,7 +36,7 @@ public final class Baggage implements SpanContext {
      *              shared/used elsewhere
      */
     Baggage(Map<String, String> local) {
-        this.local = TracerPreconditions.checkNotNull(local);
+        this.local = Objects.requireNonNull(local);
     }
 
     /**

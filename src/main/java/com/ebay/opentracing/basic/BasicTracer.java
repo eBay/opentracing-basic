@@ -23,6 +23,8 @@ import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
 import io.opentracing.propagation.Format;
 
+import java.util.Objects;
+
 /**
  * Basic {@link Tracer} implementation which implements the primary OpenTracing API but delegates the resulting
  * span data to a callback upon span completion.  It also allows for the provision of arbitrary "trace context"
@@ -60,7 +62,7 @@ final class BasicTracer<T> implements Tracer {
      */
     @Override
     public SpanBuilder buildSpan(String operationName) {
-        TracerPreconditions.checkNotNull(operationName, "operationName may not be null");
+        Objects.requireNonNull(operationName, "operationName may not be null");
         return new SpanBuilderImpl<>(scopeManager, spanInitiatorContext, spanInitiator, traceContextHandler, operationName);
     }
 
@@ -72,8 +74,8 @@ final class BasicTracer<T> implements Tracer {
         if (!(spanContext instanceof InternalSpanContext)) {
             throw new IllegalStateException("Foreign span context provided");
         }
-        TracerPreconditions.checkNotNull(format, "format may not be null");
-        TracerPreconditions.checkNotNull(carrier, "carrier may not be null");
+        Objects.requireNonNull(format, "format may not be null");
+        Objects.requireNonNull(carrier, "carrier may not be null");
 
         @SuppressWarnings("unchecked")
         InternalSpanContext<T> internalSpanContext = (InternalSpanContext<T>) spanContext;
@@ -87,8 +89,8 @@ final class BasicTracer<T> implements Tracer {
      */
     @Override
     public <C> SpanContext extract(Format<C> format, C carrier) {
-        TracerPreconditions.checkNotNull(format, "format may not be null");
-        TracerPreconditions.checkNotNull(carrier, "carrier may not be null");
+        Objects.requireNonNull(format, "format may not be null");
+        Objects.requireNonNull(carrier, "carrier may not be null");
 
         Formatter<T, C> formatter = formatters.get(format);
         return formatter.extract(carrier);

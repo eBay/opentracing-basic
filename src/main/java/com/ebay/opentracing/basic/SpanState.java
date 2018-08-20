@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -60,12 +61,12 @@ final class SpanState<T> implements MutableSpanData<T> {
             @Nullable Map<String, String> tags,
             Map<String, List<InternalSpanContext<T>>> references
     ) {
-        this.spanContext = TracerPreconditions.checkNotNull(spanContext);
-        this.operationName = TracerPreconditions.checkNotNull(operationName);
-        this.startTimeUnit = TracerPreconditions.checkNotNull(startTimeUnit);
+        this.spanContext = Objects.requireNonNull(spanContext);
+        this.operationName = Objects.requireNonNull(operationName);
+        this.startTimeUnit = Objects.requireNonNull(startTimeUnit);
         this.startTimeStamp = startTimeStamp;
         this.tags = tags;
-        this.references = TracerPreconditions.checkNotNull(references);
+        this.references = Objects.requireNonNull(references);
     }
 
     /**
@@ -105,7 +106,7 @@ final class SpanState<T> implements MutableSpanData<T> {
      */
     @Override
     public void setOperationName(String operationName) {
-        this.operationName = TracerPreconditions.checkNotNull(
+        this.operationName = Objects.requireNonNull(
                 operationName, "operationName may not be null");
     }
 
@@ -197,7 +198,7 @@ final class SpanState<T> implements MutableSpanData<T> {
      */
     @Override
     public void setFinishTime(TimeUnit finishTimeUnit, long finishTimeStamp) {
-        this.finishTimeUnit = TracerPreconditions.checkNotNull(finishTimeUnit, "finishTimeUnit may not be null");
+        this.finishTimeUnit = Objects.requireNonNull(finishTimeUnit, "finishTimeUnit may not be null");
         this.finishTimeStamp = finishTimeStamp;
     }
 

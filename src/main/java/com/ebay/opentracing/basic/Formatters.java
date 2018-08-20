@@ -19,6 +19,7 @@ package com.ebay.opentracing.basic;
 import io.opentracing.propagation.Format;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -37,8 +38,8 @@ final class Formatters<T> {
      * @param <C>       carrier data type
      */
     <C> void register(Format<C> format, Formatter<T, C> formatter) {
-        TracerPreconditions.checkNotNull(format);
-        TracerPreconditions.checkNotNull(formatter);
+        Objects.requireNonNull(format);
+        Objects.requireNonNull(formatter);
         formatters.put(format, formatter);
     }
 
@@ -50,7 +51,7 @@ final class Formatters<T> {
      * @return formatter instance or {@code null} if no registration was found
      */
     <C> Formatter<T, C> get(Format<C> format) {
-        TracerPreconditions.checkNotNull(format);
+        Objects.requireNonNull(format);
 
         @SuppressWarnings("unchecked") // Protected via strong typing at registration point
         Formatter<T, C> formatter = (Formatter<T, C>) formatters.get(format);
