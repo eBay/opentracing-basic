@@ -49,7 +49,7 @@ final class SpanInitiatorContextImpl<T> implements SpanInitiatorContext<T> {
      */
     @Override
     public Span createSpan(MutableSpanData<T> spanData) {
-        return new BaseSpanImpl<>(spanData, spanFinisher);
+        return new SpanImpl<>(spanData, spanFinisher);
     }
 
 }

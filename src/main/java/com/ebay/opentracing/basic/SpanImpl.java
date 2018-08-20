@@ -28,13 +28,13 @@ import java.util.concurrent.TimeUnit;
  * @param <S> span class type
  * @param <T> trace context type
  */
-class BaseSpanImpl<S extends Span, T> implements Span {
+class SpanImpl<S extends Span, T> implements Span {
     private static final String DEFAULT_EVENT_NAME = "event";
 
     private final MutableSpanData<T> spanState;
     private final SpanFinisher<T> spanFinisher;
 
-    BaseSpanImpl(MutableSpanData<T> spanState, SpanFinisher<T> spanFinisher) {
+    SpanImpl(MutableSpanData<T> spanState, SpanFinisher<T> spanFinisher) {
         this.spanState = spanState;
         this.spanFinisher = spanFinisher;
     }
