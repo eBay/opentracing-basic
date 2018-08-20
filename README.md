@@ -83,7 +83,7 @@ FinishedSpanReceiver receiver = ...
 Tracer tracer = new BasicTracerBuilder<>(traceContextHandler, receiver)
     .build();
 
-try (ActiveSpan span = tracer.buildSpan("operation").startActive()) {
+try (Scope scope = tracer.buildSpan("operation").startActive(true)) {
     // Measured work
 }
 ```
