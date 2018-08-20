@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 eBay Inc.
+ * Copyright (c) 2017-2018 eBay Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 
 package com.ebay.opentracing.basic;
 
-import io.opentracing.ActiveSpan;
-import io.opentracing.ActiveSpanSource;
+import io.opentracing.Scope;
+import io.opentracing.ScopeManager;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
 import io.opentracing.propagation.Format;
+
+import java.util.Objects;
 
 /**
  * Basic {@link Tracer} implementation which implements the primary OpenTracing API but delegates the resulting
@@ -36,7 +38,7 @@ final class BasicTracer<T> implements Tracer {
     private final TraceContextHandler<T> traceContextHandler;
     private final SpanFinisher<T> spanFinisher;
     private final Formatters<T> formatters;
-    private final ActiveSpanSource activeSpanSource;
+    private final ScopeManager scopeManager;
     private final SpanInitiatorContext<T> spanInitiatorContext;
     private final SpanInitiator<T> spanInitiator;
 
@@ -44,15 +46,15 @@ final class BasicTracer<T> implements Tracer {
             TraceContextHandler<T> traceContextHandler,
             SpanInitiator<T> spanInitiator,
             FinishedSpanReceiver<T> finishedSpanReceiver,
-            ActiveSpanSource activeSpanSource,
+            ScopeManager scopeManager,
             Formatters<T> formatters) {
         this.traceContextHandler = traceContextHandler;
         this.spanInitiator = spanInitiator;
         this.spanFinisher = new SpanFinisher<>(finishedSpanReceiver);
-        this.activeSpanSource = activeSpanSource;
+        this.scopeManager = scopeManager;
         this.formatters = formatters;
 
-        this.spanInitiatorContext = new SpanInitiatorContextImpl<>(activeSpanSource, spanFinisher);
+        this.spanInitiatorContext = new SpanInitiatorContextImpl<>(scopeManager, spanFinisher);
     }
 
     /**
@@ -60,8 +62,8 @@ final class BasicTracer<T> implements Tracer {
      */
     @Override
     public SpanBuilder buildSpan(String operationName) {
-        TracerPreconditions.checkNotNull(operationName, "operationName may not be null");
-        return new SpanBuilderImpl<>(activeSpanSource, spanInitiatorContext, spanInitiator, traceContextHandler, operationName);
+        Objects.requireNonNull(operationName, "operationName may not be null");
+        return new SpanBuilderImpl<>(scopeManager, spanInitiatorContext, spanInitiator, traceContextHandler, operationName);
     }
 
     /**
@@ -72,8 +74,8 @@ final class BasicTracer<T> implements Tracer {
         if (!(spanContext instanceof InternalSpanContext)) {
             throw new IllegalStateException("Foreign span context provided");
         }
-        TracerPreconditions.checkNotNull(format, "format may not be null");
-        TracerPreconditions.checkNotNull(carrier, "carrier may not be null");
+        Objects.requireNonNull(format, "format may not be null");
+        Objects.requireNonNull(carrier, "carrier may not be null");
 
         @SuppressWarnings("unchecked")
         InternalSpanContext<T> internalSpanContext = (InternalSpanContext<T>) spanContext;
@@ -87,8 +89,8 @@ final class BasicTracer<T> implements Tracer {
      */
     @Override
     public <C> SpanContext extract(Format<C> format, C carrier) {
-        TracerPreconditions.checkNotNull(format, "format may not be null");
-        TracerPreconditions.checkNotNull(carrier, "carrier may not be null");
+        Objects.requireNonNull(format, "format may not be null");
+        Objects.requireNonNull(carrier, "carrier may not be null");
 
         Formatter<T, C> formatter = formatters.get(format);
         return formatter.extract(carrier);
@@ -98,16 +100,17 @@ final class BasicTracer<T> implements Tracer {
      * {@inheritDoc}
      */
     @Override
-    public ActiveSpan activeSpan() {
-        return activeSpanSource.activeSpan();
+    public Span activeSpan() {
+        Scope activeScope = scopeManager.active();
+        return (activeScope == null) ? null : activeScope.span();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ActiveSpan makeActive(Span span) {
-        return activeSpanSource.makeActive(span);
+    public ScopeManager scopeManager() {
+        return scopeManager;
     }
 
 }

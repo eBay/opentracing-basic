@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 eBay Inc.
+ * Copyright (c) 2017-2018 eBay Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ public interface SpanInitiator<T> {
      * Initiate a {@link Span} given the current initiator context and the provided span data.
      *
      * There is no need to worry about activating the span when implementing an initiator, though the initiator
-     * context does provide access to the {@link io.opentracing.ActiveSpanSource} to expose any potential currently
+     * context does provide access to the {@link io.opentracing.ScopeManager} to expose any potential currently
      * active span.
      *
      * @param initiatorContext context in which the span is being created, providing access to the necessary internals

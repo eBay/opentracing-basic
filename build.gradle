@@ -24,8 +24,8 @@ repositories {
 dependencies {
     api 'javax.inject:javax.inject:1'
     api 'com.google.code.findbugs:jsr305:2.0.1'
-    api 'io.opentracing:opentracing-api:0.30.0'
-    api 'io.opentracing:opentracing-util:0.30.0'
+    api 'io.opentracing:opentracing-api:0.31.0'
+    api 'io.opentracing:opentracing-util:0.31.0'
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.jmockit:jmockit:1.30'
 }

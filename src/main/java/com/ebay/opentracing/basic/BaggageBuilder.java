@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 eBay Inc.
+ * Copyright (c) 2017-2018 eBay Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Builder used to create new {@link Baggage} instances.
@@ -40,7 +41,7 @@ public final class BaggageBuilder {
      * @return builder instance
      */
     public BaggageBuilder inheritAll(List<Baggage> baggages) {
-        TracerPreconditions.checkNotNull(baggages, "baggages instance may not be null");
+        Objects.requireNonNull(baggages, "baggages instance may not be null");
 
         if (inherited == null) {
             inherited = new ArrayList<>(baggages.size() + 4);
@@ -58,7 +59,7 @@ public final class BaggageBuilder {
      * @return builder instance
      */
     public BaggageBuilder inherit(Baggage baggage) {
-        TracerPreconditions.checkNotNull(baggage, "baggage instance may not be null");
+        Objects.requireNonNull(baggage, "baggage instance may not be null");
 
         if (inherited == null) {
             inherited = new ArrayList<>(4);
@@ -78,10 +79,10 @@ public final class BaggageBuilder {
      * @return builder instance
      */
     public BaggageBuilder put(String key, String value) {
-        TracerPreconditions.checkNotNull(key, "key may not be null");
+        Objects.requireNonNull(key, "key may not be null");
 
         // TODO - This one is questionable as it could be used to remove existing baggage
-        TracerPreconditions.checkNotNull(value, "value may not be null");
+        Objects.requireNonNull(value, "value may not be null");
 
         if (local == null) {
             local = new HashMap<>(4);
