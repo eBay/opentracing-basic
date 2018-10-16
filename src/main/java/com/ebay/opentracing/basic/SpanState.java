@@ -145,28 +145,8 @@ final class SpanState<T> implements MutableSpanData<T> {
                 .append(operationName)
                 .append("'");
 
-        List<InternalSpanContext<T>> childOfList = references.get(References.CHILD_OF);
-        if (childOfList != null && !childOfList.isEmpty()) {
-            builder.append(",childOf=[");
-            for (int i = 0; i < childOfList.size(); i++) {
-                if (i > 0) {
-                    builder.append(",");
-                }
-                builder.append(childOfList.get(i));
-            }
-            builder.append("]");
-        }
-        List<InternalSpanContext<T>> followsFromList = references.get(References.FOLLOWS_FROM);
-        if (followsFromList != null && !followsFromList.isEmpty()) {
-            builder.append(",followsFrom=[");
-            for (int i = 0; i < followsFromList.size(); i++) {
-                if (i > 0) {
-                    builder.append(",");
-                }
-                builder.append(followsFromList.get(i));
-            }
-            builder.append("]");
-        }
+        applyChildOf(builder, references.get(References.CHILD_OF));
+        applyFollowsFrom(builder, references.get(References.FOLLOWS_FROM));
 
         builder.append(",startTimeMs=")
                 .append(TimeUnit.MILLISECONDS.convert(startTimeStamp, startTimeUnit));
@@ -191,6 +171,32 @@ final class SpanState<T> implements MutableSpanData<T> {
         }
 
         return builder.append("}").toString();
+    }
+
+    private void applyChildOf(StringBuilder builder, List<InternalSpanContext<T>> childOfList) {
+        if (childOfList != null && !childOfList.isEmpty()) {
+            builder.append(",childOf=[");
+            for (int i = 0; i < childOfList.size(); i++) {
+                if (i > 0) {
+                    builder.append(",");
+                }
+                builder.append(childOfList.get(i));
+            }
+            builder.append("]");
+        }
+    }
+
+    private void applyFollowsFrom(StringBuilder builder, List<InternalSpanContext<T>> followsFromList) {
+        if (followsFromList != null && !followsFromList.isEmpty()) {
+            builder.append(",followsFrom=[");
+            for (int i = 0; i < followsFromList.size(); i++) {
+                if (i > 0) {
+                    builder.append(",");
+                }
+                builder.append(followsFromList.get(i));
+            }
+            builder.append("]");
+        }
     }
 
     /**
