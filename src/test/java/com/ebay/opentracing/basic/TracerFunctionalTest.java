@@ -31,7 +31,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.annotation.Nullable;
-import javax.inject.Provider;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,12 +45,6 @@ import static org.junit.Assert.*;
 @SuppressWarnings({"EmptyTryBlock", "unchecked"})
 @RunWith(JMockit.class)
 public class TracerFunctionalTest {
-
-    @Mocked
-    private Provider<String> traceIdProvider;
-
-    @Mocked
-    private Provider<String> spanIdProvider;
 
     @Mocked
     private FinishedSpanReceiver<TestTraceContext> finishedSpanReceiver;
@@ -324,10 +317,10 @@ public class TracerFunctionalTest {
         for (SpanData<?> spanData : capturedSpanData) {
             String operationName = spanData.getOperationName();
             Iterable<Map.Entry<String, String>> baggageItems = spanData.getSpanContext().getBaggage().baggageItems();
-            if (operationName.equals("outer")) {
+            if ("outer".equals(operationName)) {
                 assertEquals(1, iterableSize(baggageItems));
                 assertEquals("1", locateValue(baggageItems, "outer"));
-            } else if (operationName.equals("middle")) {
+            } else if ("middle".equals(operationName)) {
                 assertEquals(2, iterableSize(baggageItems));
                 assertEquals("1", locateValue(baggageItems, "outer"));
                 assertEquals("2", locateValue(baggageItems, "middle"));

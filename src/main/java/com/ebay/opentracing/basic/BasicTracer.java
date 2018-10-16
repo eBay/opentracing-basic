@@ -36,7 +36,6 @@ import java.util.Objects;
 final class BasicTracer<T> implements Tracer {
 
     private final TraceContextHandler<T> traceContextHandler;
-    private final SpanFinisher<T> spanFinisher;
     private final Formatters<T> formatters;
     private final ScopeManager scopeManager;
     private final SpanInitiatorContext<T> spanInitiatorContext;
@@ -50,10 +49,10 @@ final class BasicTracer<T> implements Tracer {
             Formatters<T> formatters) {
         this.traceContextHandler = traceContextHandler;
         this.spanInitiator = spanInitiator;
-        this.spanFinisher = new SpanFinisher<>(finishedSpanReceiver);
         this.scopeManager = scopeManager;
         this.formatters = formatters;
 
+        SpanFinisher<T> spanFinisher = new SpanFinisher<>(finishedSpanReceiver);
         this.spanInitiatorContext = new SpanInitiatorContextImpl<>(scopeManager, spanFinisher);
     }
 
