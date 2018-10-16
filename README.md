@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/eBay/opentracing-basic.svg?branch=master)](https://travis-ci.org/eBay/opentracing-basic)
 [![Download](https://api.bintray.com/packages/mcumings/opentracing-basic/opentracing-basic/images/download.svg) ](https://bintray.com/mcumings/opentracing-basic/opentracing-basic/_latestVersion)
+[![Code Quality](https://api.codacy.com/project/badge/Grade/ce1ab6b874234287824aceaa06d3f417)](https://www.codacy.com/app/eBay/opentracing-basic?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=eBay/opentracing-basic&amp;utm_campaign=Badge_Grade)
 
 ## Introduction
 
