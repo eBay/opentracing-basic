@@ -6,7 +6,7 @@ We welcome contributions and have provided a guide to help make this is as strai
 
 ## Steps
 
-1. [Raise an Issue](#raise-and-issue)
+1. [Raise an Issue](#raise-an-issue)
 1. [Write code](#write-code)
 1. [Submit pull request](#submit-pull-request)
 
